@@ -61,7 +61,7 @@
     "/Users/milesangelo/.nuget/packages/": {}
   },
   "project": {
-    "version": "1.0.0",
+    "version": "0.0.0",
     "restore": {
       "projectUniqueName": "/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client.csproj",
       "projectName": "Coinbase.AdvancedTrade.Client",
@@ -70,6 +70,7 @@
       "outputPath": "/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
+        "/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/NuGet.Config",
         "/Users/milesangelo/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
