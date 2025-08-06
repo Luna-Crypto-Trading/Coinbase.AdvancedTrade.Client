@@ -8,7 +8,8 @@
     <Version>0.1.0-alpha</Version>
     <Authors>Luna Crypto Trading</Authors>
     <Company>Luna Crypto Trading</Company>
-    <Description>A .NET client library for the Coinbase Advanced Trade API with dependency injection support</Description>
+    <Description>[ALPHA] Proof-of-concept .NET client library for Coinbase Advanced Trade API. Currently contains basic DI extension method demonstration. Not recommended for production use.</Description>
+    <PackageReleaseNotes>Alpha release - proof of concept with basic DI extension method. Contains IHelloWorldService demonstration only. Production features coming in future releases.</PackageReleaseNotes>
     <PackageTags>coinbase;api;client;crypto;trading;dependency-injection</PackageTags>
     <RepositoryUrl>https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

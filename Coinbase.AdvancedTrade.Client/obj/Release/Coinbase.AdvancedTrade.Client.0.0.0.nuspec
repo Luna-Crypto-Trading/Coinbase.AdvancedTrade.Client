@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Coinbase.AdvancedTrade.Client</id>
+    <version>0.0.0</version>
+    <authors>Luna Crypto Trading</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client</projectUrl>
+    <description>A .NET client library for the Coinbase Advanced Trade API with dependency injection support</description>
+    <tags>coinbase api client crypto trading dependency-injection</tags>
+    <repository type="git" url="https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client" commit="4c3f5144b910d7f46fe699fbd8128e0dfd06d460" />
+    <dependencies>
+      <group targetFramework="net9.0">
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="9.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/bin/Release/net9.0/Coinbase.AdvancedTrade.Client.dll" target="lib/net9.0/Coinbase.AdvancedTrade.Client.dll" />
+    <file src="/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/README.md" target="/README.md" />
+  </files>
+</package>

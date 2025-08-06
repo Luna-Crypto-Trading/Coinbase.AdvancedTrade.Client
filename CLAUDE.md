@@ -22,13 +22,26 @@ This is a .NET client library for the Coinbase Advanced Trade API. Currently con
 - `TestApp/` - Console application for testing the library
 - `.github/workflows/publish.yml` - GitHub Actions workflow for publishing to GitHub Packages
 
-## Publishing to GitHub Packages
+## Publishing to NuGet.org
 
 1. Update version in `.csproj` file
-2. Update repository URL and author information in `.csproj`
-3. Create a tag: `git tag v1.0.0`
-4. Push the tag: `git push origin v1.0.0`
+2. Ensure `NUGET_API_KEY` secret is configured in GitHub repository settings
+3. Create a tag: `git tag v0.2.0-alpha`
+4. Push the tag: `git push origin v0.2.0-alpha`
 5. GitHub Actions will automatically build and publish the package
+
+## Release Strategy
+
+- **Alpha versions (0.x.x-alpha)**: Development/proof-of-concept releases
+- **Beta versions (0.x.x-beta)**: Feature-complete pre-releases for testing
+- **Release candidates (1.0.0-rc.x)**: Production-ready candidates
+- **Stable release (1.0.0)**: First production-ready version with full API implementation
+
+## Current Status: Alpha
+- Contains only proof-of-concept DI extension method
+- IHelloWorldService demonstration only
+- Version 1.0.0 has been unlisted (was accidental early release)
+- Use --prerelease flag to install current alpha versions
 
 ## Using the Package
 
