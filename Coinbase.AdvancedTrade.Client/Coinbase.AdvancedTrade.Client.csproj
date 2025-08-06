@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Coinbase.AdvancedTrade.Client</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Your Name</Authors>
+    <Description>A .NET client library for the Coinbase Advanced Trade API</Description>
+    <PackageTags>coinbase;api;client;crypto;trading</PackageTags>
+    <RepositoryUrl>https://github.com/your-username/Coinbase.AdvancedTrade.Client</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>

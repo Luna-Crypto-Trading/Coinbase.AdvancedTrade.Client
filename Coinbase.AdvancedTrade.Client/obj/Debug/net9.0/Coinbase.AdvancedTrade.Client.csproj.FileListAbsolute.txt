@@ -1,0 +1,13 @@
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/bin/Debug/net9.0/Coinbase.AdvancedTrade.Client.deps.json
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/bin/Debug/net9.0/Coinbase.AdvancedTrade.Client.dll
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/bin/Debug/net9.0/Coinbase.AdvancedTrade.Client.pdb
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.csproj.AssemblyReference.cache
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.GeneratedMSBuildEditorConfig.editorconfig
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.AssemblyInfoInputs.cache
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.AssemblyInfo.cs
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.csproj.CoreCompileInputs.cache
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.sourcelink.json
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.dll
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/refint/Coinbase.AdvancedTrade.Client.dll
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/Coinbase.AdvancedTrade.Client.pdb
+/Users/milesangelo/Source/active/luna-crypto/Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client/obj/Debug/net9.0/ref/Coinbase.AdvancedTrade.Client.dll
