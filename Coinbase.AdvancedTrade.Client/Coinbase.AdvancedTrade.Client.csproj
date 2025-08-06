@@ -5,13 +5,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Coinbase.AdvancedTrade.Client</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>Your Name</Authors>
-    <Description>A .NET client library for the Coinbase Advanced Trade API</Description>
-    <PackageTags>coinbase;api;client;crypto;trading</PackageTags>
-    <RepositoryUrl>https://github.com/your-username/Coinbase.AdvancedTrade.Client</RepositoryUrl>
+    <Version>0.0.0</Version>
+    <Authors>Luna Crypto Trading</Authors>
+    <Company>Luna Crypto Trading</Company>
+    <Description>A .NET client library for the Coinbase Advanced Trade API with dependency injection support</Description>
+    <PackageTags>coinbase;api;client;crypto;trading;dependency-injection</PackageTags>
+    <RepositoryUrl>https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
