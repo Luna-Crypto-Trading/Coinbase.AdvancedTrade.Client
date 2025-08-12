@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Coinbase.AdvancedTrade.Client</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.3.1-alpha</Version>
     <Authors>Luna Crypto Trading</Authors>
     <Company>Luna Crypto Trading</Company>
-    <Description>A comprehensive .NET client library for Coinbase Advanced Trade API with built-in authentication, resilience patterns, and dependency injection support.</Description>
-    <PackageReleaseNotes>Alpha release - Full featured client with JWT authentication, all API endpoints, retry policies, and circuit breaker patterns. Extracted from production code.</PackageReleaseNotes>
+    <Description>A comprehensive .NET client library for Coinbase Advanced Trade API with built-in JWT authentication, resilience patterns, and dependency injection support. Includes all major endpoints: accounts, orders, products, portfolios, historical data, and real-time pricing.</Description>
+    <PackageReleaseNotes>Alpha v0.3.1 - Complete Coinbase Advanced Trade client extracted from production code. Features: JWT authentication with ECDSA signing, comprehensive models for all endpoints, retry policies with exponential backoff, circuit breaker patterns, full DI integration with IServiceCollection extensions, async/await throughout, structured logging support, fluent order builders, helper extensions, and credential validation. Clean namespace structure.</PackageReleaseNotes>
     <PackageTags>coinbase;api;client;crypto;trading;dependency-injection</PackageTags>
     <RepositoryUrl>https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
