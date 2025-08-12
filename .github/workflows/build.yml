@@ -24,5 +24,8 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
     
-    - name: Run TestApp
-      run: dotnet run --project TestApp --no-build --configuration Release
+    - name: Pack (without publish)
+      run: dotnet pack Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client.csproj --no-build --configuration Release --output ./packages
+    
+    - name: Verify package created
+      run: ls -la ./packages/*.nupkg
