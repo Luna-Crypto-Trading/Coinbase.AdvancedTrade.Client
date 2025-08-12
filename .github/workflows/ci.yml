@@ -1,0 +1,188 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        dotnet-version: ['9.0.x']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Run Unit Tests with Coverage
+      run: |
+        dotnet test Coinbase.AdvancedTrade.Client.Tests/Coinbase.AdvancedTrade.Client.Tests.csproj \
+          --no-build \
+          --configuration Release \
+          --verbosity normal \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+    
+    - name: Run Integration Tests with Coverage
+      run: |
+        dotnet test Coinbase.AdvancedTrade.Client.IntegrationTests/Coinbase.AdvancedTrade.Client.IntegrationTests.csproj \
+          --no-build \
+          --configuration Release \
+          --verbosity normal \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+    
+    - name: Generate Coverage Report
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        dotnet tool install --global dotnet-reportgenerator-globaltool
+        reportgenerator \
+          -reports:"./coverage/**/coverage.cobertura.xml" \
+          -targetdir:"./coverage/report" \
+          -reporttypes:"Cobertura;HtmlInline;Badges"
+    
+    - name: Upload Coverage to Codecov
+      if: matrix.os == 'ubuntu-latest'
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/**/coverage.cobertura.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Upload Coverage Reports
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-reports
+        path: ./coverage/report/
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Check formatting
+      run: dotnet format --verify-no-changes --verbosity diagnostic
+    
+    - name: Run .NET analyzers
+      run: dotnet build --no-restore --configuration Release /p:TreatWarningsAsErrors=true
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Run security scan
+      run: |
+        dotnet list package --vulnerable --include-transitive
+        dotnet list package --deprecated --include-transitive
+
+  publish-preview:
+    needs: [test, code-quality, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Create preview package
+      run: |
+        VERSION=$(date +%Y%m%d%H%M%S)
+        dotnet pack Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client.csproj \
+          --no-build \
+          --configuration Release \
+          --output ./packages \
+          /p:VersionSuffix="preview-$VERSION"
+    
+    - name: Upload preview package
+      uses: actions/upload-artifact@v3
+      with:
+        name: preview-packages
+        path: ./packages/*.nupkg
+
+  publish-release:
+    needs: [test, code-quality, security-scan]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Pack
+      run: dotnet pack Coinbase.AdvancedTrade.Client/Coinbase.AdvancedTrade.Client.csproj \
+        --no-build \
+        --configuration Release \
+        --output ./packages
+    
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ./packages/*.nupkg \
+        --source https://api.nuget.org/v3/index.json \
+        --api-key ${{ secrets.NUGET_API_KEY }} \
+        --skip-duplicate
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./packages/*.nupkg
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
