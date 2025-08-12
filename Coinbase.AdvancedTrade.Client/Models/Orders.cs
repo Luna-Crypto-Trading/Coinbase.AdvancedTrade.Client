@@ -56,7 +56,7 @@ public record OrderInformation
     public required bool Success { get; set; }
 
     [JsonPropertyName("success_response")]
-    public required SuccessResponse SuccessResponse { get; set; }
+    public SuccessResponse? SuccessResponse { get; set; }
 
     [JsonPropertyName("error_response")]
     public ErrorResponse? ErrorResponse { get; set; }

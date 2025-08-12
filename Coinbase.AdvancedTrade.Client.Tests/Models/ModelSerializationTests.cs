@@ -221,7 +221,21 @@ public class ModelSerializationTests
             ""product_type"": ""SPOT"",
             ""quote_currency"": ""USD"",
             ""base_currency"": ""BTC"",
-            ""mid_market_price"": ""50000""
+            ""quote_currency_id"": ""USD"",
+            ""base_currency_id"": ""BTC"",
+            ""fcm_trading_session_details"": {
+                ""is_open"": true,
+                ""open_time"": ""2023-01-01T09:00:00Z"",
+                ""close_time"": ""2023-01-01T17:00:00Z""
+            },
+            ""mid_market_price"": ""50000"",
+            ""alias"": ""BTC-USD"",
+            ""alias_to"": [],
+            ""base_display_symbol"": ""BTC"",
+            ""quote_display_symbol"": ""USD"",
+            ""price_increment"": ""0.01"",
+            ""display_name"": ""Bitcoin"",
+            ""product_venue"": ""CBE""
         }";
 
         // Act
@@ -373,6 +387,12 @@ public class ModelSerializationTests
     {
         // Arrange
         var json = @"{
+            ""portfolio"": {
+                ""name"": ""Test Portfolio"",
+                ""uuid"": ""portfolio-123"",
+                ""type"": ""CONSUMER"",
+                ""deleted"": false
+            },
             ""portfolio_balances"": {
                 ""total_balance"": {
                     ""value"": ""10000.00"",
@@ -406,9 +426,17 @@ public class ModelSerializationTests
                     ""total_balance_fiat"": 5000.00,
                     ""total_balance_crypto"": 0.1,
                     ""available_to_trade_fiat"": 4500.00,
-                    ""allocation"": 0.5
+                    ""allocation"": 0.5,
+                    ""cost_basis"": {
+                        ""value"": ""4800.00"",
+                        ""currency"": ""USD""
+                    },
+                    ""asset_img_url"": ""https://example.com/btc.png"",
+                    ""is_cash"": false
                 }
-            ]
+            ],
+            ""perp_positions"": [],
+            ""futures_positions"": []
         }";
 
         // Act

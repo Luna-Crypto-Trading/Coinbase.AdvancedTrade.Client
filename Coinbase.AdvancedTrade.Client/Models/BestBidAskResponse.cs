@@ -4,6 +4,7 @@ namespace Coinbase.AdvancedTrade.Client.Models;
 
 public class BestBidAskResponse
 {
+    [JsonPropertyName("pricebooks")]
     public required List<PriceBook> PriceBooks { get; set; }
 }
 

@@ -121,7 +121,12 @@ public class AdvancedTradeProduct
 
 public class SessionDetails
 {
+    [JsonPropertyName("is_open")]
     public required bool IsOpen { get; set; }
+    
+    [JsonPropertyName("open_time")]
     public required DateTimeOffset OpenTime { get; set; }
+    
+    [JsonPropertyName("close_time")]
     public required DateTimeOffset CloseTime { get; set; }
 }
