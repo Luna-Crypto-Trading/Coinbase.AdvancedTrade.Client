@@ -46,7 +46,7 @@ public class ModelSerializationTests
         json.Should().Contain("\"product_id\": \"BTC-USD\"");
         json.Should().Contain("\"side\": \"BUY\"");
         json.Should().Contain("\"quote_size\": \"1000.00\"");
-        
+
         deserialized.Should().NotBeNull();
         deserialized!.ClientOrderId.Should().Be(order.ClientOrderId);
         deserialized.ProductId.Should().Be(order.ProductId);
@@ -82,7 +82,7 @@ public class ModelSerializationTests
         json.Should().Contain("\"base_size\": \"2.5\"");
         json.Should().Contain("\"limit_price\": \"3000.00\"");
         json.Should().Contain("\"post_only\": true");
-        
+
         deserialized.Should().NotBeNull();
         deserialized!.OrderConfiguration!.LimitLimitGtc!.PostOnly.Should().BeTrue();
         deserialized.OrderConfiguration.LimitLimitGtc.BaseSize.Should().Be("2.5");
@@ -286,7 +286,7 @@ public class ModelSerializationTests
         // Assert
         result.Should().NotBeNull();
         result!.PriceBooks.Should().HaveCount(1);
-        
+
         var pricebook = result.PriceBooks.First();
         pricebook.ProductId.Should().Be("BTC-USD");
         pricebook.Bids.Should().HaveCount(2);
@@ -332,7 +332,7 @@ public class ModelSerializationTests
         // Assert
         result.Should().NotBeNull();
         result!.Candles.Should().HaveCount(2);
-        
+
         var firstCandle = result.Candles.First();
         firstCandle.Start.Should().Be("1704110400");
         firstCandle.Low.Should().Be("49500");
@@ -419,7 +419,7 @@ public class ModelSerializationTests
         result!.PortfolioBalances.Should().NotBeNull();
         result.PortfolioBalances!.TotalBalance!.Value.Should().Be("10000.00");
         result.PortfolioBalances.TotalCryptoBalance!.Value.Should().Be("7000.00");
-        
+
         result.SpotPositions.Should().HaveCount(1);
         var spotPosition = result.SpotPositions.First();
         spotPosition.Asset.Should().Be("BTC");

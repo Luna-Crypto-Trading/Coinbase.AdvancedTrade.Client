@@ -25,15 +25,15 @@ public static class CoinbaseConstants
         public const string XlmUsd = "XLM-USD";
         public const string AlgoUsd = "ALGO-USD";
         public const string AtomUsd = "ATOM-USD";
-        
+
         // EUR pairs
         public const string BtcEur = "BTC-EUR";
         public const string EthEur = "ETH-EUR";
-        
+
         // GBP pairs
         public const string BtcGbp = "BTC-GBP";
         public const string EthGbp = "ETH-GBP";
-        
+
         // BTC pairs
         public const string EthBtc = "ETH-BTC";
         public const string AdaBtc = "ADA-BTC";
@@ -125,7 +125,7 @@ public static class CoinbaseConstants
         public const string Usd = "USD";
         public const string Eur = "EUR";
         public const string Gbp = "GBP";
-        
+
         // Major cryptocurrencies
         public const string Btc = "BTC";
         public const string Eth = "ETH";

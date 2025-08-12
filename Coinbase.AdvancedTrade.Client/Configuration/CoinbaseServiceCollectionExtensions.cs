@@ -85,7 +85,7 @@ public static class CoinbaseServiceCollectionExtensions
     {
         var settings = new CoinbaseSettings();
         configureOptions(settings);
-        
+
         return services.AddCoinbaseAdvancedTradeClient(settings);
     }
 }

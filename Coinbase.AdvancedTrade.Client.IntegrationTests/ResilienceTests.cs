@@ -25,7 +25,7 @@ public class ResilienceTests : IDisposable
 
         var services = new ServiceCollection();
         services.AddLogging(builder => builder.AddConsole());
-        
+
         // Configure settings to use WireMock server
         services.AddSingleton(new CoinbaseSettings
         {
@@ -34,10 +34,10 @@ public class ResilienceTests : IDisposable
 
         // Mock JWT generator
         services.AddSingleton<ICoinbaseJwtGenerator>(new MockJwtGenerator());
-        
+
         // Add authenticator
         services.AddTransient<CoinbaseAuthenticator>();
-        
+
         // Configure HttpClient with our mock server
         services.AddHttpClient("CoinbaseApi", client =>
         {
@@ -255,7 +255,7 @@ public class ResilienceTests : IDisposable
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Data!.PriceBooks.Should().HaveCount(1);
-        
+
         var pricebook = result.Data.PriceBooks.First();
         pricebook.ProductId.Should().Be("BTC-USD");
         pricebook.Bids.First().Price.Should().Be("49900.00");

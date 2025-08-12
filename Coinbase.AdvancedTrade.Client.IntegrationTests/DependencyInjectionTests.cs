@@ -34,13 +34,13 @@ public class DependencyInjectionTests
         // Assert
         serviceProvider.GetService<ICoinbaseAdvancedTradeClient>()
             .Should().NotBeNull("ICoinbaseAdvancedTradeClient should be registered");
-        
+
         serviceProvider.GetService<ICoinbaseJwtGenerator>()
             .Should().NotBeNull("ICoinbaseJwtGenerator should be registered");
-        
+
         serviceProvider.GetService<ICoinbaseApi>()
             .Should().NotBeNull("ICoinbaseApi should be registered");
-        
+
         serviceProvider.GetService<CoinbaseSettings>()
             .Should().NotBeNull("CoinbaseSettings should be registered");
     }
@@ -53,7 +53,7 @@ public class DependencyInjectionTests
         var expectedApiKey = "my-test-api-key";
         var expectedApiSecret = "my-test-api-secret";
         var expectedBaseUrl = "https://api.coinbase.com/test";
-        
+
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -99,7 +99,7 @@ public class DependencyInjectionTests
         // Assert - Get two instances and verify they are the same
         var instance1 = serviceProvider.GetRequiredService<ICoinbaseAdvancedTradeClient>();
         var instance2 = serviceProvider.GetRequiredService<ICoinbaseAdvancedTradeClient>();
-        
+
         instance1.Should().BeSameAs(instance2, "Service should be registered as singleton");
     }
 
@@ -109,7 +109,7 @@ public class DependencyInjectionTests
         // Arrange
         var services = new ServiceCollection();
         var expectedBaseUrl = "https://api.coinbase.com/api/v3/brokerage";
-        
+
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -129,7 +129,7 @@ public class DependencyInjectionTests
         // Assert
         var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
         var httpClient = httpClientFactory.CreateClient("CoinbaseApi");
-        
+
         httpClient.BaseAddress.Should().NotBeNull();
         httpClient.BaseAddress!.ToString().Should().StartWith(expectedBaseUrl);
     }

@@ -30,7 +30,7 @@ try
     // Test listing products
     logger.LogInformation("Fetching available products...");
     var productsResponse = await client.ListProductsAsync();
-    
+
     if (productsResponse.IsSuccess && productsResponse.Data != null)
     {
         logger.LogInformation("Found {ProductCount} products", productsResponse.Data.ProductCount);
@@ -38,7 +38,7 @@ try
         // Display first few products
         foreach (var product in productsResponse.Data.Products.Take(5))
         {
-            logger.LogInformation("Product: {ProductId} - Price: {Price} ({Change}%)", 
+            logger.LogInformation("Product: {ProductId} - Price: {Price} ({Change}%)",
                 product.ProductId, product.Price, product.PricePercentageChange24h);
         }
     }
@@ -50,7 +50,7 @@ try
     // Test getting best bid/ask for BTC-USD
     logger.LogInformation("Getting best bid/ask for BTC-USD...");
     var bidAskResponse = await client.GetBestBidAskAsync(new List<string> { "BTC-USD" });
-    
+
     if (bidAskResponse.IsSuccess && bidAskResponse.Data != null)
     {
         if (bidAskResponse.Data.PriceBooks.Any())
@@ -58,7 +58,7 @@ try
             var btcBook = bidAskResponse.Data.PriceBooks.First();
             if (btcBook.Bids.Any() && btcBook.Asks.Any())
             {
-                logger.LogInformation("BTC-USD - Best Bid: {BestBid}, Best Ask: {BestAsk}", 
+                logger.LogInformation("BTC-USD - Best Bid: {BestBid}, Best Ask: {BestAsk}",
                     btcBook.Bids.First().Price, btcBook.Asks.First().Price);
             }
         }

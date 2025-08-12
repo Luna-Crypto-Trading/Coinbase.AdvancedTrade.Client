@@ -112,7 +112,7 @@ public class OrderRequestBuilder
     public OrderRequestBuilder StopLimitOrder(decimal baseSize, decimal limitPrice, decimal stopPrice, StopDirection direction)
     {
         var stopDirectionString = direction == StopDirection.Up ? "STOP_DIRECTION_STOP_UP" : "STOP_DIRECTION_STOP_DOWN";
-        
+
         _order.OrderConfiguration.StopLimitStopLimitGtc = new StopLimitStopLimitGtcV3
         {
             BaseSize = baseSize.ToString(CultureInfo.InvariantCulture),
@@ -129,7 +129,7 @@ public class OrderRequestBuilder
     public OrderRequestBuilder StopLimitOrderWithExpiry(decimal baseSize, decimal limitPrice, decimal stopPrice, StopDirection direction, DateTime endTime)
     {
         var stopDirectionString = direction == StopDirection.Up ? "STOP_DIRECTION_STOP_UP" : "STOP_DIRECTION_STOP_DOWN";
-        
+
         _order.OrderConfiguration.StopLimitStopLimitGtd = new StopLimitStopLimitGtdV3
         {
             BaseSize = baseSize,

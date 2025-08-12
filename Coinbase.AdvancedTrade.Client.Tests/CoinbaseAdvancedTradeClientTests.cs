@@ -280,8 +280,8 @@ public class CoinbaseAdvancedTradeClientTests
         {
             PriceBooks = new List<PriceBook>
             {
-                new PriceBook 
-                { 
+                new PriceBook
+                {
                     ProductId = "BTC-USD",
                     Bids = new List<PriceBookEntry> { new PriceBookEntry { Price = "50000", Size = "0.1" } },
                     Asks = new List<PriceBookEntry> { new PriceBookEntry { Price = "50100", Size = "0.2" } },
@@ -542,8 +542,8 @@ public class CoinbaseAdvancedTradeClientTests
         {
             Candles = new List<Candle>
             {
-                new Candle 
-                { 
+                new Candle
+                {
                     Start = start.ToString(),
                     Low = "49000",
                     High = "51000",
