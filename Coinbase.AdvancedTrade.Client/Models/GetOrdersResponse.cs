@@ -182,7 +182,7 @@ public class OrderV3
     public required string NumberOfFills { get; set; }
 
     [JsonPropertyName("filled_value")]
-    public required string FilledValue { get; set; }
+    public string? FilledValue { get; set; }
 
     [JsonPropertyName("pending_cancel")]
     public bool PendingCancel { get; set; }
@@ -191,49 +191,49 @@ public class OrderV3
     public bool SizeInQuote { get; set; }
 
     [JsonPropertyName("total_fees")]
-    public required string TotalFees { get; set; }
+    public string? TotalFees { get; set; }
 
     [JsonPropertyName("size_inclusive_of_fees")]
     public bool SizeInclusiveOfFees { get; set; }
 
     [JsonPropertyName("total_value_after_fees")]
-    public required string TotalValueAfterFees { get; set; }
+    public string? TotalValueAfterFees { get; set; }
 
     [JsonPropertyName("trigger_status")]
-    public required string TriggerStatus { get; set; }
+    public string? TriggerStatus { get; set; }
 
     [JsonPropertyName("order_type")]
-    public required string OrderType { get; set; }
+    public string? OrderType { get; set; }
 
     [JsonPropertyName("reject_reason")]
-    public required string RejectReason { get; set; }
+    public string? RejectReason { get; set; }
 
     [JsonPropertyName("settled")]
     public bool Settled { get; set; }
 
     [JsonPropertyName("product_type")]
-    public required string ProductType { get; set; }
+    public string? ProductType { get; set; }
 
     [JsonPropertyName("reject_message")]
-    public required string RejectMessage { get; set; }
+    public string? RejectMessage { get; set; }
 
     [JsonPropertyName("cancel_message")]
-    public required string CancelMessage { get; set; }
+    public string? CancelMessage { get; set; }
 
     [JsonPropertyName("order_placement_source")]
-    public required string OrderPlacementSource { get; set; }
+    public string? OrderPlacementSource { get; set; }
 
     [JsonPropertyName("outstanding_hold_amount")]
-    public required string OutstandingHoldAmount { get; set; }
+    public string? OutstandingHoldAmount { get; set; }
 
     [JsonPropertyName("is_liquidation")]
     public bool IsLiquidation { get; set; }
 
     [JsonPropertyName("last_fill_time")]
-    public required string LastFillTime { get; set; }
+    public string? LastFillTime { get; set; }
 
     [JsonPropertyName("edit_history")]
-    public required List<EditHistory> EditHistory { get; set; }
+    public List<EditHistory>? EditHistory { get; set; }
 }
 
 public class GetOrdersResponse

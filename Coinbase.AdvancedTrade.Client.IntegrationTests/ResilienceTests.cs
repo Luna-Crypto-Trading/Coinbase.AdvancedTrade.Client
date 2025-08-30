@@ -35,23 +35,24 @@ public class ResilienceTests : IDisposable
         // Mock JWT generator
         services.AddSingleton<ICoinbaseJwtGenerator>(new MockJwtGenerator());
 
-        // Add authenticator
-        services.AddTransient<CoinbaseAuthenticator>();
+        // Add mock API credentials
+        var mockApiKey = "test-api-key";
+        var mockApiSecret = "test-api-secret";
 
-        // Configure HttpClient with our mock server
-        services.AddHttpClient("CoinbaseApi", client =>
+        // Create authenticator factory
+        services.AddSingleton<IAuthenticatedClientFactory>(provider =>
         {
-            client.BaseAddress = new Uri(_server.Urls[0]);
-        })
-        .AddHttpMessageHandler<CoinbaseAuthenticator>();
+            var jwtGenerator = provider.GetRequiredService<ICoinbaseJwtGenerator>();
+            var settings = provider.GetRequiredService<CoinbaseSettings>();
+            return new MockAuthenticatedClientFactory(jwtGenerator, settings, mockApiKey, mockApiSecret);
+        });
 
-        // Add Refit client
+        // Add Refit client without authentication (we'll handle it in the factory)
         services.AddRefitClient<ICoinbaseApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(_server.Urls[0]))
-            .AddHttpMessageHandler<CoinbaseAuthenticator>();
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(_server.Urls[0]));
 
         // Add the main client
-        services.AddSingleton<ICoinbaseAdvancedTradeClient, CoinbaseAdvancedTradeClient>();
+        services.AddTransient<ICoinbaseAdvancedTradeClient, CoinbaseAdvancedTradeClient>();
 
         _serviceProvider = services.BuildServiceProvider();
         _client = _serviceProvider.GetRequiredService<ICoinbaseAdvancedTradeClient>();
@@ -119,7 +120,7 @@ public class ResilienceTests : IDisposable
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Data!.SuccessResponse.OrderId.Should().Be("success-after-retry");
+        result.Data!.SuccessResponse!.OrderId.Should().Be("success-after-retry");
         // Should have eventually succeeded after retries
     }
 
@@ -132,13 +133,29 @@ public class ResilienceTests : IDisposable
                 {
                     ""order_id"": ""test-order-1"",
                     ""product_id"": ""BTC-USD"",
-                    ""status"": ""FILLED""
+                    ""user_id"": ""test-user-123"",
+                    ""order_configuration"": {
+                        ""market_market_ioc"": {
+                            ""quote_size"": ""5000.00""
+                        }
+                    },
+                    ""side"": ""BUY"",
+                    ""client_order_id"": ""client-order-123"",
+                    ""status"": ""FILLED"",
+                    ""time_in_force"": ""IMMEDIATE_OR_CANCEL"",
+                    ""created_time"": ""2024-01-01T00:00:00Z"",
+                    ""completion_percentage"": ""100"",
+                    ""filled_size"": ""0.1"",
+                    ""average_filled_price"": ""50000.00"",
+                    ""number_of_fills"": ""1""
                 }
             ],
-            ""has_next"": false
+            ""has_next"": false,
+            ""cursor"": """",
+            ""order"": ""DESC""
         }";
 
-        // First fail then succeed
+        // First fail with 503 (which should trigger a retry)
         _server
             .Given(Request.Create()
                 .WithPath("/orders/historical/batch")
@@ -181,14 +198,44 @@ public class ResilienceTests : IDisposable
                     ""base_currency"": ""BTC"",
                     ""quote_currency"": ""USD"",
                     ""price"": ""50000.00"",
-                    ""status"": ""online""
+                    ""status"": ""online"",
+                    ""price_percentage_change_24h"": ""5.0"",
+                    ""volume_24h"": ""1000000"",
+                    ""volume_percentage_change_24h"": ""10.0"",
+                    ""base_increment"": ""0.00000001"",
+                    ""quote_increment"": ""0.01"",
+                    ""quote_min_size"": ""10"",
+                    ""quote_max_size"": ""1000000"",
+                    ""base_min_size"": ""0.001"",
+                    ""base_max_size"": ""100"",
+                    ""base_currency_id"": ""BTC"",
+                    ""quote_currency_id"": ""USD"",
+                    ""display_name"": ""BTC-USD"",
+                    ""is_disabled"": false,
+                    ""new"": false,
+                    ""auction_mode"": false
                 },
                 {
                     ""product_id"": ""ETH-USD"",
                     ""base_currency"": ""ETH"",
                     ""quote_currency"": ""USD"",
                     ""price"": ""3000.00"",
-                    ""status"": ""online""
+                    ""status"": ""online"",
+                    ""price_percentage_change_24h"": ""3.0"",
+                    ""volume_24h"": ""500000"",
+                    ""volume_percentage_change_24h"": ""7.0"",
+                    ""base_increment"": ""0.00000001"",
+                    ""quote_increment"": ""0.01"",
+                    ""quote_min_size"": ""10"",
+                    ""quote_max_size"": ""1000000"",
+                    ""base_min_size"": ""0.01"",
+                    ""base_max_size"": ""1000"",
+                    ""base_currency_id"": ""ETH"",
+                    ""quote_currency_id"": ""USD"",
+                    ""display_name"": ""ETH-USD"",
+                    ""is_disabled"": false,
+                    ""new"": false,
+                    ""auction_mode"": false
                 }
             ]
         }";
@@ -362,6 +409,37 @@ public class ResilienceTests : IDisposable
         public string GenerateJwt(string uri, string apiKey, string apiSecret)
         {
             return "mock-jwt-token";
+        }
+    }
+
+    private class MockAuthenticatedClientFactory : IAuthenticatedClientFactory
+    {
+        private readonly ICoinbaseJwtGenerator _jwtGenerator;
+        private readonly CoinbaseSettings _settings;
+        private readonly string _apiKey;
+        private readonly string _apiSecret;
+
+        public MockAuthenticatedClientFactory(
+            ICoinbaseJwtGenerator jwtGenerator,
+            CoinbaseSettings settings,
+            string apiKey,
+            string apiSecret)
+        {
+            _jwtGenerator = jwtGenerator;
+            _settings = settings;
+            _apiKey = apiKey;
+            _apiSecret = apiSecret;
+        }
+
+        public HttpClient CreateAuthenticatedClient(string baseUrl, string apiKey, string apiSecret)
+        {
+            var innerHandler = new HttpClientHandler();
+            var authenticator = new CoinbaseAuthenticator(_jwtGenerator, _apiKey, _apiSecret, _settings)
+            {
+                InnerHandler = innerHandler
+            };
+            
+            return new HttpClient(authenticator) { BaseAddress = new Uri(baseUrl) };
         }
     }
 }

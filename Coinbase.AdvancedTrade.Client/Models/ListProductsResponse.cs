@@ -47,10 +47,10 @@ public class AdvancedTradeProduct
     public required string BaseMaxSize { get; set; }
 
     [JsonPropertyName("base_name")]
-    public required string BaseName { get; set; }
+    public string? BaseName { get; set; }
 
     [JsonPropertyName("quote_name")]
-    public required string QuoteName { get; set; }
+    public string? QuoteName { get; set; }
 
     [JsonPropertyName("watched")]
     public bool Watched { get; set; }
@@ -80,7 +80,7 @@ public class AdvancedTradeProduct
     public bool AuctionMode { get; set; }
 
     [JsonPropertyName("product_type")]
-    public required string ProductType { get; set; }
+    public string? ProductType { get; set; }
 
     [JsonPropertyName("quote_currency_id")]
     public required string QuoteCurrencyId { get; set; }
@@ -89,34 +89,34 @@ public class AdvancedTradeProduct
     public required string BaseCurrencyId { get; set; }
 
     [JsonPropertyName("fcm_trading_session_details")]
-    public required SessionDetails FcmTradingSessionDetails { get; set; }
+    public SessionDetails? FcmTradingSessionDetails { get; set; }
 
     [JsonPropertyName("mid_market_price")]
-    public required string MidMarketPrice { get; set; }
+    public string? MidMarketPrice { get; set; }
 
     [JsonPropertyName("alias")]
-    public required string Alias { get; set; }
+    public string? Alias { get; set; }
 
     [JsonPropertyName("alias_to")]
-    public required List<string> AliasTo { get; set; }
+    public List<string>? AliasTo { get; set; }
 
     [JsonPropertyName("base_display_symbol")]
-    public required string BaseDisplaySymbol { get; set; }
+    public string? BaseDisplaySymbol { get; set; }
 
     [JsonPropertyName("quote_display_symbol")]
-    public required string QuoteDisplaySymbol { get; set; }
+    public string? QuoteDisplaySymbol { get; set; }
 
     [JsonPropertyName("view_only")]
     public bool ViewOnly { get; set; }
 
     [JsonPropertyName("price_increment")]
-    public required string PriceIncrement { get; set; }
+    public string? PriceIncrement { get; set; }
 
     [JsonPropertyName("display_name")]
     public required string DisplayName { get; set; }
 
     [JsonPropertyName("product_venue")]
-    public required string ProductVenue { get; set; }
+    public string? ProductVenue { get; set; }
 }
 
 public class SessionDetails

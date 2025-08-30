@@ -57,7 +57,7 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         _logger = logger;
 
         _retryPolicy = Policy
-            .Handle<ApiException>(ex => ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            .Handle<ApiException>(ex => IsTransientError(ex))
             .Or<HttpRequestException>()
             .WaitAndRetryAsync(
                 3,
@@ -96,6 +96,16 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
                     _logger?.LogInformation("Circuit breaker half-open for Coinbase API");
                 }
             );
+    }
+
+    private static bool IsTransientError(ApiException ex)
+    {
+        return ex.StatusCode is
+            System.Net.HttpStatusCode.TooManyRequests or
+            System.Net.HttpStatusCode.BadGateway or
+            System.Net.HttpStatusCode.ServiceUnavailable or
+            System.Net.HttpStatusCode.GatewayTimeout or
+            System.Net.HttpStatusCode.RequestTimeout;
     }
 
     public async Task<ApiResponse<OrderInformation>> PlaceOrderAsync(OrderRequest order, CancellationToken cancellationToken = default)
