@@ -10,6 +10,11 @@ namespace Coinbase.AdvancedTrade.Client;
 
 public interface ICoinbaseAdvancedTradeClient
 {
+    // Accounts
+    Task<ApiResponse<AccountsResponse>> ListAccountsAsync(int? limit = null, string? cursor = null, string? retailPortfolioId = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CoinbaseAccount>> GetAccountAsync(Guid id, CancellationToken cancellationToken = default);
+
+    // Orders
     Task<ApiResponse<OrderInformation>> PlaceOrderAsync(OrderRequest order, CancellationToken cancellationToken = default);
     Task<ApiResponse<EditOrderResponse>> EditOrderAsync(EditOrderRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<PreviewOrderResponse>> PreviewOrderAsync(OrderRequest order, CancellationToken cancellationToken = default);
@@ -18,16 +23,67 @@ public interface ICoinbaseAdvancedTradeClient
     Task<ApiResponse<OrderInformation>> ClosePositionAsync(ClosePositionRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<GetOrdersResponse>> GetOrdersAsync(OrderSearchRequest? request = null, CancellationToken cancellationToken = default);
     Task<ApiResponse<GetOrderResponse>> GetOrderAsync(string orderId, CancellationToken cancellationToken = default);
-    Task<ApiResponse<ListProductsResponse>> ListProductsAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<FillsResponse>> GetFillsAsync(string? orderId = null, string? productId = null, string? cursor = null, int? limit = null, string? sortBy = null, CancellationToken cancellationToken = default);
+
+    // Products
+    Task<ApiResponse<ListProductsResponse>> ListProductsAsync(int? limit = null, int? offset = null, string? productType = null, List<string>? productIds = null, string? contractExpiryType = null, string? expiringContractStatus = null, bool? getAllProducts = null, CancellationToken cancellationToken = default);
     Task<ApiResponse<AdvancedTradeProduct>> GetProductAsync(string productId, CancellationToken cancellationToken = default);
-    Task<ApiResponse<CandleResponse>> GetProductCandlesAsync(string productId, long start, long end, string granularity, CancellationToken cancellationToken = default);
-    Task<ApiResponse<MarketTradesResponse>> GetMarketTradesAsync(string productId, int limit = 100, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductBookResponse>> GetProductBookAsync(string productId, int? limit = null, string? aggregationPriceIncrement = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CandleResponse>> GetProductCandlesAsync(string productId, long start, long end, string granularity, int? limit = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<MarketTradesResponse>> GetMarketTradesAsync(string productId, int limit = 100, string? start = null, string? end = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CandleResponse>> GetPublicProductCandlesAsync(string productId, long start, long end, string granularity, int? limit = null, CancellationToken cancellationToken = default);
+
+    // Public
+    Task<ApiResponse<ServerTimeResponse>> GetServerTimeAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<ProductBookResponse>> GetPublicProductBookAsync(string productId, int? limit = null, string? aggregationPriceIncrement = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ListProductsResponse>> GetPublicProductsAsync(int? limit = null, int? offset = null, string? productType = null, List<string>? productIds = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<AdvancedTradeProduct>> GetPublicProductAsync(string productId, CancellationToken cancellationToken = default);
+    Task<ApiResponse<MarketTradesResponse>> GetPublicMarketTradesAsync(string productId, int limit = 100, string? start = null, string? end = null, CancellationToken cancellationToken = default);
+
+    // Payments
+    Task<ApiResponse<PaymentMethodsResponse>> ListPaymentMethodsAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<PaymentMethod>> GetPaymentMethodAsync(string paymentMethodId, CancellationToken cancellationToken = default);
+
+    // Market Data
     Task<ApiResponse<BestBidAskResponse>> GetBestBidAskAsync(List<string>? productIds = null, CancellationToken cancellationToken = default);
-    Task<ApiResponse<TransactionSummaryResponse>> GetTransactionSummaryAsync(CancellationToken cancellationToken = default);
-    Task<ApiResponse<AccountsResponse>> ListAccountsAsync(CancellationToken cancellationToken = default);
-    Task<ApiResponse<CoinbaseAccount>> GetAccountAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<ApiResponse<AdvancedTradePortfolioResponse>> GetPortfoliosAsync(CancellationToken cancellationToken = default);
+
+    // Fees
+    Task<ApiResponse<TransactionSummaryResponse>> GetTransactionSummaryAsync(string? productType = null, string? contractExpiryType = null, string? productVenue = null, CancellationToken cancellationToken = default);
+
+    // Portfolios
+    Task<ApiResponse<AdvancedTradePortfolioResponse>> GetPortfoliosAsync(string? portfolioType = null, CancellationToken cancellationToken = default);
     Task<ApiResponse<AdvancedTradePortfolioBreakdownResponse>> GetPortfolioBreakdownAsync(string portfolioUuid, CancellationToken cancellationToken = default);
+    Task<ApiResponse<AdvancedTradePortfolioResponse>> CreatePortfolioAsync(string name, CancellationToken cancellationToken = default);
+    Task<ApiResponse<AdvancedTradePortfolioResponse>> EditPortfolioAsync(string portfolioUuid, string name, CancellationToken cancellationToken = default);
+    Task<ApiResponse<EmptyResponse>> DeletePortfolioAsync(string portfolioUuid, CancellationToken cancellationToken = default);
+    Task<ApiResponse<MoveFundsResponse>> MovePortfolioFundsAsync(MoveFundsRequest request, CancellationToken cancellationToken = default);
+
+    // Perpetuals / INTX
+    Task<ApiResponse<EmptyResponse>> AllocatePortfolioAsync(AllocatePortfolioRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IntxPortfolioResponse>> GetPerpsPortfolioSummaryAsync(string portfolioUuid, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IntxPositionsResponse>> ListPerpsPositionsAsync(string portfolioUuid, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IntxPositionResponse>> GetPerpsPositionAsync(string portfolioUuid, string symbol, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IntxBalancesResponse>> GetPerpsPortfolioBalancesAsync(string portfolioUuid, CancellationToken cancellationToken = default);
+    Task<ApiResponse<MultiAssetCollateralResponse>> SetMultiAssetCollateralAsync(MultiAssetCollateralRequest request, CancellationToken cancellationToken = default);
+
+    // Converts
+    Task<ApiResponse<ConvertQuoteResponse>> CreateConvertQuoteAsync(ConvertQuoteRequest request, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ConvertTradeResponse>> GetConvertTradeAsync(string tradeId, string fromAccount, string toAccount, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ConvertTradeResponse>> CommitConvertTradeAsync(string tradeId, ConvertQuoteRequest request, CancellationToken cancellationToken = default);
+
+    // Futures / CFM
+    Task<ApiResponse<FuturesBalanceSummaryResponse>> GetFuturesBalanceSummaryAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<FuturesPositionsResponse>> ListFuturesPositionsAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<FuturesPositionResponse>> GetFuturesPositionAsync(string productId, CancellationToken cancellationToken = default);
+    Task<ApiResponse<FuturesSweepResponse>> ScheduleFuturesSweepAsync(string usdAmount, CancellationToken cancellationToken = default);
+    Task<ApiResponse<FuturesSweepResponse>> ListFuturesSweepsAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<FuturesSweepResponse>> CancelFuturesSweepAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<IntradayMarginSettingResponse>> GetIntradayMarginSettingAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<CurrentMarginWindowResponse>> GetCurrentMarginWindowAsync(string? marginProfileType = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<IntradayMarginSettingResponse>> SetIntradayMarginSettingAsync(string setting, CancellationToken cancellationToken = default);
+
+    // Data
+    Task<ApiResponse<KeyPermissionsResponse>> GetKeyPermissionsAsync(CancellationToken cancellationToken = default);
 }
 
 public class ApiResponse<T>
@@ -49,7 +105,7 @@ public class ApiResponse<T>
     public static ApiResponse<T> Failure(string errorMessage, Exception? exception = null) => new(false, default, errorMessage, exception);
 }
 
-public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
+public partial class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
 {
     private readonly ICoinbaseApi _coinbaseApi;
     private readonly ILogger<CoinbaseAdvancedTradeClient>? _logger;
@@ -301,14 +357,14 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         }
     }
 
-    public async Task<ApiResponse<ListProductsResponse>> ListProductsAsync(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<ListProductsResponse>> ListProductsAsync(int? limit = null, int? offset = null, string? productType = null, List<string>? productIds = null, string? contractExpiryType = null, string? expiringContractStatus = null, bool? getAllProducts = null, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger?.LogInformation("Retrieving available products");
 
             var response = await _resiliencePipeline.ExecuteAsync(
-                async ct => await _coinbaseApi.ListProducts(ct),
+                async ct => await _coinbaseApi.ListProducts(limit, offset, productType, productIds, contractExpiryType, expiringContractStatus, getAllProducts, ct),
                 cancellationToken);
 
             return ApiResponse<ListProductsResponse>.Success(response);
@@ -337,14 +393,14 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         }
     }
 
-    public async Task<ApiResponse<CandleResponse>> GetProductCandlesAsync(string productId, long start, long end, string granularity, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<CandleResponse>> GetProductCandlesAsync(string productId, long start, long end, string granularity, int? limit = null, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger?.LogInformation("Retrieving historical rates for product {ProductId} with granularity {Granularity}", productId, granularity);
 
             var response = await _resiliencePipeline.ExecuteAsync(
-                async ct => await _coinbaseApi.GetProductCandles(productId, start, end, granularity, ct),
+                async ct => await _coinbaseApi.GetProductCandles(productId, start, end, granularity, limit, ct),
                 cancellationToken);
 
             _logger?.LogInformation("Successfully retrieved historical rates for product {ProductId}", productId);
@@ -356,14 +412,14 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         }
     }
 
-    public async Task<ApiResponse<MarketTradesResponse>> GetMarketTradesAsync(string productId, int limit = 100, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<MarketTradesResponse>> GetMarketTradesAsync(string productId, int limit = 100, string? start = null, string? end = null, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger?.LogInformation("Retrieving market trades for product {ProductId}", productId);
 
             var response = await _resiliencePipeline.ExecuteAsync(
-                async ct => await _coinbaseApi.GetMarketTrades(productId, limit, ct),
+                async ct => await _coinbaseApi.GetMarketTrades(productId, limit, start, end, ct),
                 cancellationToken);
 
             return ApiResponse<MarketTradesResponse>.Success(response);
@@ -392,14 +448,14 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         }
     }
 
-    public async Task<ApiResponse<TransactionSummaryResponse>> GetTransactionSummaryAsync(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<TransactionSummaryResponse>> GetTransactionSummaryAsync(string? productType = null, string? contractExpiryType = null, string? productVenue = null, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger?.LogInformation("Retrieving transaction summary");
 
             var response = await _resiliencePipeline.ExecuteAsync(
-                async ct => await _coinbaseApi.GetTransactionSummary(ct),
+                async ct => await _coinbaseApi.GetTransactionSummary(productType, contractExpiryType, productVenue, ct),
                 cancellationToken);
 
             return ApiResponse<TransactionSummaryResponse>.Success(response);
@@ -410,14 +466,14 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         }
     }
 
-    public async Task<ApiResponse<AccountsResponse>> ListAccountsAsync(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<AccountsResponse>> ListAccountsAsync(int? limit = null, string? cursor = null, string? retailPortfolioId = null, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger?.LogInformation("Retrieving user accounts");
 
             var response = await _resiliencePipeline.ExecuteAsync(
-                async ct => await _coinbaseApi.ListAccounts(ct),
+                async ct => await _coinbaseApi.ListAccounts(limit, cursor, retailPortfolioId, ct),
                 cancellationToken);
 
             return ApiResponse<AccountsResponse>.Success(response);
@@ -446,14 +502,14 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         }
     }
 
-    public async Task<ApiResponse<AdvancedTradePortfolioResponse>> GetPortfoliosAsync(CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<AdvancedTradePortfolioResponse>> GetPortfoliosAsync(string? portfolioType = null, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger?.LogInformation("Retrieving portfolios");
 
             var response = await _resiliencePipeline.ExecuteAsync(
-                async ct => await _coinbaseApi.GetPortfolios(ct),
+                async ct => await _coinbaseApi.GetPortfolios(portfolioType, ct),
                 cancellationToken);
 
             return ApiResponse<AdvancedTradePortfolioResponse>.Success(response);
@@ -479,6 +535,284 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
         catch (Exception ex)
         {
             return HandleException<AdvancedTradePortfolioBreakdownResponse>(ex, $"retrieving portfolio breakdown for {portfolioUuid}");
+        }
+    }
+
+    public async Task<ApiResponse<FillsResponse>> GetFillsAsync(string? orderId = null, string? productId = null, string? cursor = null, int? limit = null, string? sortBy = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving order fills");
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetFills(orderId, productId, cursor, limit, sortBy, ct),
+                cancellationToken);
+
+            return ApiResponse<FillsResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<FillsResponse>(ex, "retrieving fills");
+        }
+    }
+
+    public async Task<ApiResponse<ProductBookResponse>> GetProductBookAsync(string productId, int? limit = null, string? aggregationPriceIncrement = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving product book for {ProductId}", productId);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetProductBook(productId, limit, aggregationPriceIncrement, ct),
+                cancellationToken);
+
+            return ApiResponse<ProductBookResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<ProductBookResponse>(ex, $"retrieving product book for {productId}");
+        }
+    }
+
+    public async Task<ApiResponse<CandleResponse>> GetPublicProductCandlesAsync(string productId, long start, long end, string granularity, int? limit = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving public candles for product {ProductId}", productId);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPublicProductCandles(productId, start, end, granularity, limit, ct),
+                cancellationToken);
+
+            return ApiResponse<CandleResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<CandleResponse>(ex, $"retrieving public candles for {productId}");
+        }
+    }
+
+    public async Task<ApiResponse<ServerTimeResponse>> GetServerTimeAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving server time");
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetServerTime(ct),
+                cancellationToken);
+
+            return ApiResponse<ServerTimeResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<ServerTimeResponse>(ex, "retrieving server time");
+        }
+    }
+
+    public async Task<ApiResponse<ProductBookResponse>> GetPublicProductBookAsync(string productId, int? limit = null, string? aggregationPriceIncrement = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving public product book for {ProductId}", productId);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPublicProductBook(productId, limit, aggregationPriceIncrement, ct),
+                cancellationToken);
+
+            return ApiResponse<ProductBookResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<ProductBookResponse>(ex, $"retrieving public product book for {productId}");
+        }
+    }
+
+    public async Task<ApiResponse<ListProductsResponse>> GetPublicProductsAsync(int? limit = null, int? offset = null, string? productType = null, List<string>? productIds = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving public products");
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPublicProducts(limit, offset, productType, productIds, ct),
+                cancellationToken);
+
+            return ApiResponse<ListProductsResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<ListProductsResponse>(ex, "retrieving public products");
+        }
+    }
+
+    public async Task<ApiResponse<AdvancedTradeProduct>> GetPublicProductAsync(string productId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving public product {ProductId}", productId);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPublicProduct(productId, ct),
+                cancellationToken);
+
+            return ApiResponse<AdvancedTradeProduct>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<AdvancedTradeProduct>(ex, $"retrieving public product {productId}");
+        }
+    }
+
+    public async Task<ApiResponse<MarketTradesResponse>> GetPublicMarketTradesAsync(string productId, int limit = 100, string? start = null, string? end = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving public market trades for {ProductId}", productId);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPublicMarketTrades(productId, limit, start, end, ct),
+                cancellationToken);
+
+            return ApiResponse<MarketTradesResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<MarketTradesResponse>(ex, $"retrieving public market trades for {productId}");
+        }
+    }
+
+    public async Task<ApiResponse<PaymentMethodsResponse>> ListPaymentMethodsAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving payment methods");
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPaymentMethods(ct),
+                cancellationToken);
+
+            return ApiResponse<PaymentMethodsResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<PaymentMethodsResponse>(ex, "retrieving payment methods");
+        }
+    }
+
+    public async Task<ApiResponse<PaymentMethod>> GetPaymentMethodAsync(string paymentMethodId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving payment method {PaymentMethodId}", paymentMethodId);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetPaymentMethod(paymentMethodId, ct),
+                cancellationToken);
+
+            return ApiResponse<PaymentMethod>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<PaymentMethod>(ex, $"retrieving payment method {paymentMethodId}");
+        }
+    }
+
+    public async Task<ApiResponse<AdvancedTradePortfolioResponse>> CreatePortfolioAsync(string name, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Creating portfolio {Name}", name);
+
+            var request = new CreatePortfolioRequest { Name = name };
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.CreatePortfolio(request, ct),
+                cancellationToken);
+
+            return ApiResponse<AdvancedTradePortfolioResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<AdvancedTradePortfolioResponse>(ex, $"creating portfolio {name}");
+        }
+    }
+
+    public async Task<ApiResponse<AdvancedTradePortfolioResponse>> EditPortfolioAsync(string portfolioUuid, string name, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Editing portfolio {PortfolioUuid}", portfolioUuid);
+
+            var request = new EditPortfolioRequest { Name = name };
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.EditPortfolio(portfolioUuid, request, ct),
+                cancellationToken);
+
+            return ApiResponse<AdvancedTradePortfolioResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<AdvancedTradePortfolioResponse>(ex, $"editing portfolio {portfolioUuid}");
+        }
+    }
+
+    public async Task<ApiResponse<EmptyResponse>> DeletePortfolioAsync(string portfolioUuid, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Deleting portfolio {PortfolioUuid}", portfolioUuid);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.DeletePortfolio(portfolioUuid, ct),
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger?.LogWarning("Failed to delete portfolio {PortfolioUuid}: {StatusCode}", portfolioUuid, response.StatusCode);
+                return ApiResponse<EmptyResponse>.Failure($"Failed to delete portfolio: {response.StatusCode}");
+            }
+
+            return ApiResponse<EmptyResponse>.Success(new EmptyResponse());
+        }
+        catch (Exception ex)
+        {
+            return HandleException<EmptyResponse>(ex, $"deleting portfolio {portfolioUuid}");
+        }
+    }
+
+    public async Task<ApiResponse<MoveFundsResponse>> MovePortfolioFundsAsync(MoveFundsRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Moving funds from {Source} to {Target}", request.SourcePortfolioUuid, request.TargetPortfolioUuid);
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.MoveFunds(request, ct),
+                cancellationToken);
+
+            return ApiResponse<MoveFundsResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<MoveFundsResponse>(ex, "moving portfolio funds");
+        }
+    }
+
+    public async Task<ApiResponse<KeyPermissionsResponse>> GetKeyPermissionsAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving API key permissions");
+
+            var response = await _resiliencePipeline.ExecuteAsync(
+                async ct => await _coinbaseApi.GetKeyPermissions(ct),
+                cancellationToken);
+
+            return ApiResponse<KeyPermissionsResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<KeyPermissionsResponse>(ex, "retrieving API key permissions");
         }
     }
 
