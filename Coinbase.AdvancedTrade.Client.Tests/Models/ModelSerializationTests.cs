@@ -506,4 +506,102 @@ public class ModelSerializationTests
     }
 
     #endregion
+
+    #region CancelOrders Serialization Tests
+
+    [Fact]
+    public void CancelOrdersRequest_Serialization_ProducesCorrectJson()
+    {
+        // Arrange
+        var request = new CancelOrdersRequest
+        {
+            OrderIds = new List<string> { "order-1", "order-2" }
+        };
+
+        // Act
+        var json = JsonSerializer.Serialize(request, _jsonOptions);
+        var deserialized = JsonSerializer.Deserialize<CancelOrdersRequest>(json, _jsonOptions);
+
+        // Assert
+        deserialized.Should().NotBeNull();
+        deserialized!.OrderIds.Should().HaveCount(2);
+        deserialized.OrderIds.Should().Contain("order-1");
+        deserialized.OrderIds.Should().Contain("order-2");
+        json.Should().Contain("order_ids");
+    }
+
+    [Fact]
+    public void CancelOrdersResponse_Deserialization_ParsesCorrectly()
+    {
+        // Arrange
+        var json = @"{
+            ""results"": [
+                {
+                    ""success"": true,
+                    ""failure_reason"": null,
+                    ""order_id"": ""order-1""
+                },
+                {
+                    ""success"": false,
+                    ""failure_reason"": ""UNKNOWN_CANCEL_FAILURE_REASON"",
+                    ""order_id"": ""order-2""
+                }
+            ]
+        }";
+
+        // Act
+        var result = JsonSerializer.Deserialize<CancelOrdersResponse>(json, _jsonOptions);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Results.Should().HaveCount(2);
+        result.Results[0].Success.Should().BeTrue();
+        result.Results[0].OrderId.Should().Be("order-1");
+        result.Results[1].Success.Should().BeFalse();
+        result.Results[1].FailureReason.Should().Be("UNKNOWN_CANCEL_FAILURE_REASON");
+    }
+
+    #endregion
+
+    #region GetOrderResponse Serialization Tests
+
+    [Fact]
+    public void GetOrderResponse_Deserialization_ParsesCorrectly()
+    {
+        // Arrange
+        var json = @"{
+            ""order"": {
+                ""order_id"": ""test-order-123"",
+                ""product_id"": ""BTC-USD"",
+                ""user_id"": ""user-1"",
+                ""order_configuration"": {},
+                ""side"": ""BUY"",
+                ""client_order_id"": ""client-1"",
+                ""status"": ""FILLED"",
+                ""time_in_force"": ""GOOD_UNTIL_CANCELLED"",
+                ""created_time"": ""2024-01-01T00:00:00Z"",
+                ""completion_percentage"": ""100"",
+                ""filled_size"": ""0.5"",
+                ""average_filled_price"": ""50000.00"",
+                ""number_of_fills"": ""1"",
+                ""total_fees"": ""25.00"",
+                ""settled"": true
+            }
+        }";
+
+        // Act
+        var result = JsonSerializer.Deserialize<GetOrderResponse>(json, _jsonOptions);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Order.Should().NotBeNull();
+        result.Order.OrderId.Should().Be("test-order-123");
+        result.Order.ProductId.Should().Be("BTC-USD");
+        result.Order.Status.Should().Be("FILLED");
+        result.Order.FilledSize.Should().Be("0.5");
+        result.Order.TotalFees.Should().Be("25.00");
+        result.Order.Settled.Should().BeTrue();
+    }
+
+    #endregion
 }

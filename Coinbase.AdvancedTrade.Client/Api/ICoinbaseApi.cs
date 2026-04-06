@@ -13,45 +13,58 @@ public interface ICoinbaseApi
     /// List all accounts available to the user
     /// </summary>
     [Get("/accounts")]
-    Task<AccountsResponse> ListAccounts();
+    Task<AccountsResponse> ListAccounts(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get account details by ID
     /// </summary>
     [Get("/accounts/{id}")]
-    Task<CoinbaseAccount> GetAccount(Guid id);
+    Task<CoinbaseAccount> GetAccount(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get historical orders
     /// </summary>
     [Get("/orders/historical/batch")]
-    Task<GetOrdersResponse> GetOrders(OrderSearchRequest? request = null);
+    Task<GetOrdersResponse> GetOrders(OrderSearchRequest? request = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get a specific order by ID
+    /// </summary>
+    [Get("/orders/historical/{orderId}")]
+    Task<GetOrderResponse> GetOrder(string orderId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Place a new order
     /// </summary>
     [Post("/orders")]
-    Task<OrderInformation> PlaceOrder([Body] OrderRequest request);
+    Task<OrderInformation> PlaceOrder([Body] OrderRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cancel one or more orders by ID
+    /// </summary>
+    [Post("/orders/batch_cancel")]
+    Task<CancelOrdersResponse> CancelOrders([Body] CancelOrdersRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Close an existing position/order
     /// </summary>
     [Post("/orders/close_position")]
-    Task<OrderInformation> ClosePosition([Body] ClosePositionRequest request);
+    Task<OrderInformation> ClosePosition([Body] ClosePositionRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get the best bid/ask prices for specified products
     /// </summary>
     [Get("/best_bid_ask")]
     Task<BestBidAskResponse> GetBestBidAsk(
-        [Query(CollectionFormat.Multi)] List<string>? product_ids = null
+        [Query(CollectionFormat.Multi)] List<string>? product_ids = null,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>
     /// List all available products
     /// </summary>
     [Get("/products")]
-    Task<ListProductsResponse> ListProducts();
+    Task<ListProductsResponse> ListProducts(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get candlestick data for a product
@@ -61,7 +74,8 @@ public interface ICoinbaseApi
         string productId,
         [Query] long start,
         [Query] long end,
-        [Query] string granularity
+        [Query] string granularity,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>
@@ -72,24 +86,25 @@ public interface ICoinbaseApi
         string productId,
         [Query] long start,
         [Query] long end,
-        [Query] string granularity
+        [Query] string granularity,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>
     /// Get details for a specific product
     /// </summary>
     [Get("/products/{productId}")]
-    Task<string> GetProduct(string productId);
+    Task<AdvancedTradeProduct> GetProduct(string productId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all portfolios for the user
     /// </summary>
     [Get("/portfolios")]
-    Task<AdvancedTradePortfolioResponse> GetPortfolios();
+    Task<AdvancedTradePortfolioResponse> GetPortfolios(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get detailed breakdown of a specific portfolio
     /// </summary>
     [Get("/portfolios/{portfolio_uuid}")]
-    Task<AdvancedTradePortfolioBreakdownResponse> GetPortfolioBreakdown(string portfolio_uuid);
+    Task<AdvancedTradePortfolioBreakdownResponse> GetPortfolioBreakdown(string portfolio_uuid, CancellationToken cancellationToken = default);
 }
