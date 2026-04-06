@@ -771,6 +771,260 @@ public class CoinbaseAdvancedTradeClientTests
 
     #endregion
 
+    #region EditOrderAsync Tests
+
+    [Fact]
+    public async Task EditOrderAsync_WithSuccessfulEdit_ReturnsSuccess()
+    {
+        // Arrange
+        var request = new EditOrderRequest { OrderId = "order-1", Price = "51000", Size = "0.5" };
+        var expectedResponse = new EditOrderResponse { Success = true };
+
+        _mockApi.EditOrder(Arg.Any<EditOrderRequest>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.EditOrderAsync(request);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.Success.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task EditOrderAsync_WithFailedEdit_ReturnsFailure()
+    {
+        // Arrange
+        var request = new EditOrderRequest { OrderId = "order-1", Price = "51000", Size = "0.5" };
+        var expectedResponse = new EditOrderResponse
+        {
+            Success = false,
+            Errors = new List<EditOrderError>
+            {
+                new EditOrderError { EditFailureReason = "EDIT_FAILURE_NOT_FOUND" }
+            }
+        };
+
+        _mockApi.EditOrder(Arg.Any<EditOrderRequest>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.EditOrderAsync(request);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("EDIT_FAILURE_NOT_FOUND");
+    }
+
+    #endregion
+
+    #region PreviewOrderAsync Tests
+
+    [Fact]
+    public async Task PreviewOrderAsync_ReturnsPreviewData()
+    {
+        // Arrange
+        var order = new OrderRequest
+        {
+            ClientOrderId = Guid.NewGuid().ToString(),
+            ProductId = "BTC-USD",
+            Side = "BUY",
+            OrderConfiguration = new OrderConfiguration
+            {
+                MarketMarketIoc = new MarketMarketIoc { QuoteSize = "100" }
+            }
+        };
+
+        var expectedResponse = new PreviewOrderResponse
+        {
+            OrderTotal = "100.50",
+            CommissionTotal = "0.50",
+            QuoteSize = "100",
+            BaseSize = "0.002",
+            BestBid = "49999",
+            BestAsk = "50001"
+        };
+
+        _mockApi.PreviewOrder(Arg.Any<OrderRequest>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.PreviewOrderAsync(order);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.OrderTotal.Should().Be("100.50");
+        result.Data.CommissionTotal.Should().Be("0.50");
+        result.Data.BestBid.Should().Be("49999");
+    }
+
+    #endregion
+
+    #region PreviewEditOrderAsync Tests
+
+    [Fact]
+    public async Task PreviewEditOrderAsync_ReturnsPreviewData()
+    {
+        // Arrange
+        var request = new EditOrderRequest { OrderId = "order-1", Price = "51000", Size = "0.5" };
+        var expectedResponse = new PreviewOrderResponse
+        {
+            OrderTotal = "25500",
+            CommissionTotal = "12.75"
+        };
+
+        _mockApi.PreviewEditOrder(Arg.Any<EditOrderRequest>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.PreviewEditOrderAsync(request);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.OrderTotal.Should().Be("25500");
+    }
+
+    #endregion
+
+    #region GetMarketTradesAsync Tests
+
+    [Fact]
+    public async Task GetMarketTradesAsync_ReturnsTradeData()
+    {
+        // Arrange
+        var expectedResponse = new MarketTradesResponse
+        {
+            Trades = new List<MarketTrade>
+            {
+                new MarketTrade
+                {
+                    TradeId = "trade-1",
+                    ProductId = "BTC-USD",
+                    Price = "50000",
+                    Size = "0.1",
+                    Time = "2024-01-01T00:00:00Z",
+                    Side = "BUY"
+                }
+            },
+            BestBid = "49999",
+            BestAsk = "50001"
+        };
+
+        _mockApi.GetMarketTrades("BTC-USD", 10).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.GetMarketTradesAsync("BTC-USD", 10);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.Trades.Should().HaveCount(1);
+        result.Data.Trades[0].Price.Should().Be("50000");
+        result.Data.BestBid.Should().Be("49999");
+    }
+
+    #endregion
+
+    #region GetTransactionSummaryAsync Tests
+
+    [Fact]
+    public async Task GetTransactionSummaryAsync_ReturnsFeeData()
+    {
+        // Arrange
+        var expectedResponse = new TransactionSummaryResponse
+        {
+            TotalFees = 125.50,
+            FeeTier = new FeeTier
+            {
+                PricingTier = "<$10k",
+                TakerFeeRate = "0.006",
+                MakerFeeRate = "0.004"
+            },
+            AdvancedTradeOnlyVolume = 50000
+        };
+
+        _mockApi.GetTransactionSummary().Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.GetTransactionSummaryAsync();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.TotalFees.Should().Be(125.50);
+        result.Data.FeeTier.TakerFeeRate.Should().Be("0.006");
+        result.Data.FeeTier.MakerFeeRate.Should().Be("0.004");
+    }
+
+    #endregion
+
+    #region GetPortfoliosAsync Tests
+
+    [Fact]
+    public async Task GetPortfoliosAsync_ReturnsPortfolios()
+    {
+        // Arrange
+        var expectedResponse = new AdvancedTradePortfolioResponse
+        {
+            Portfolios = new List<AdvancedTradePortfolio>
+            {
+                new AdvancedTradePortfolio { Uuid = "portfolio-1", Name = "Default", Type = "DEFAULT", Deleted = false }
+            }
+        };
+
+        _mockApi.GetPortfolios().Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.GetPortfoliosAsync();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.Portfolios.Should().HaveCount(1);
+        result.Data.Portfolios[0].Name.Should().Be("Default");
+    }
+
+    [Fact]
+    public async Task GetPortfoliosAsync_WithApiError_ReturnsFailure()
+    {
+        // Arrange
+        var apiException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Get, "https://api.coinbase.com"),
+            HttpMethod.Get,
+            new HttpResponseMessage(HttpStatusCode.Unauthorized),
+            new RefitSettings()
+        );
+
+        _mockApi.GetPortfolios().Throws(apiException);
+
+        // Act
+        var result = await _sut.GetPortfoliosAsync();
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("Authentication failed");
+    }
+
+    #endregion
+
+    #region GetPortfolioBreakdownAsync Tests
+
+    [Fact]
+    public async Task GetPortfolioBreakdownAsync_WithApiError_ReturnsFailure()
+    {
+        // Arrange
+        var apiException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Get, "https://api.coinbase.com"),
+            HttpMethod.Get,
+            new HttpResponseMessage(HttpStatusCode.NotFound),
+            new RefitSettings()
+        );
+
+        _mockApi.GetPortfolioBreakdown("nonexistent").Throws(apiException);
+
+        // Act
+        var result = await _sut.GetPortfolioBreakdownAsync("nonexistent");
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("not found");
+    }
+
+    #endregion
+
     #region CancellationToken Tests
 
     [Fact]
@@ -828,6 +1082,78 @@ public class CoinbaseAdvancedTradeClientTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         await _mockApi.Received(1).ListAccounts(Arg.Any<CancellationToken>());
+    }
+
+    #endregion
+
+    #region Resilience Tests
+
+    [Fact]
+    public async Task NonTransientError_DoesNotRetry()
+    {
+        // Arrange - 401 Unauthorized is not transient, should not retry
+        var orderRequest = new OrderRequest
+        {
+            ClientOrderId = Guid.NewGuid().ToString(),
+            ProductId = "BTC-USD",
+            Side = "BUY",
+            OrderConfiguration = new OrderConfiguration
+            {
+                MarketMarketIoc = new MarketMarketIoc { QuoteSize = "100" }
+            }
+        };
+
+        var unauthorizedException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Post, "https://api.coinbase.com"),
+            HttpMethod.Post,
+            new HttpResponseMessage(HttpStatusCode.Unauthorized),
+            new RefitSettings()
+        );
+
+        _mockApi.PlaceOrder(Arg.Any<OrderRequest>(), Arg.Any<CancellationToken>())
+            .Throws(unauthorizedException);
+
+        // Act
+        var result = await _sut.PlaceOrderAsync(orderRequest);
+
+        // Assert - should NOT retry, only 1 call
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("Authentication failed");
+        await _mockApi.Received(1).PlaceOrder(Arg.Any<OrderRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RetryExhaustion_AllAttemptsFail_ReturnsError()
+    {
+        // Arrange - 429 is transient, will retry 3 times then fail
+        var orderRequest = new OrderRequest
+        {
+            ClientOrderId = Guid.NewGuid().ToString(),
+            ProductId = "BTC-USD",
+            Side = "BUY",
+            OrderConfiguration = new OrderConfiguration
+            {
+                MarketMarketIoc = new MarketMarketIoc { QuoteSize = "100" }
+            }
+        };
+
+        var rateLimitException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Post, "https://api.coinbase.com"),
+            HttpMethod.Post,
+            new HttpResponseMessage(HttpStatusCode.TooManyRequests),
+            new RefitSettings()
+        );
+
+        _mockApi.PlaceOrder(Arg.Any<OrderRequest>(), Arg.Any<CancellationToken>())
+            .Throws(rateLimitException);
+
+        // Act
+        var result = await _sut.PlaceOrderAsync(orderRequest);
+
+        // Assert - 1 initial + 3 retries = 4 total calls
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().NotBeEmpty();
+        await _mockApi.Received(4).PlaceOrder(Arg.Any<OrderRequest>(), Arg.Any<CancellationToken>());
     }
 
     #endregion

@@ -1,4 +1,6 @@
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Coinbase.AdvancedTrade.Client.Authentication;
 using FluentAssertions;
 
@@ -12,6 +14,55 @@ public class CoinbaseJwtGeneratorTests
     public CoinbaseJwtGeneratorTests()
     {
         _sut = new CoinbaseJwtGenerator();
+    }
+
+    [Fact]
+    public void GenerateJwt_WithValidKey_ReturnsValidJwt()
+    {
+        // Arrange - generate a real EC P-256 key
+        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var privateKeyBytes = ecdsa.ExportECPrivateKey();
+        var base64Key = Convert.ToBase64String(privateKeyBytes);
+        var uri = "https://api.coinbase.com/api/v3/brokerage/accounts";
+        var apiKey = "test-api-key-123";
+
+        // Act
+        var jwt = _sut.GenerateJwt(uri, apiKey, base64Key);
+
+        // Assert - JWT has 3 dot-separated parts
+        jwt.Should().NotBeNullOrEmpty();
+        var parts = jwt.Split('.');
+        parts.Should().HaveCount(3, "JWT must have header.payload.signature");
+
+        // Decode header and verify claims
+        var headerJson = Encoding.UTF8.GetString(Base64UrlDecode(parts[0]));
+        var header = JsonDocument.Parse(headerJson).RootElement;
+        header.GetProperty("alg").GetString().Should().Be("ES256");
+        header.GetProperty("kid").GetString().Should().Be(apiKey);
+        header.GetProperty("typ").GetString().Should().Be("JWT");
+        header.TryGetProperty("nonce", out _).Should().BeTrue();
+
+        // Decode payload and verify claims
+        var payloadJson = Encoding.UTF8.GetString(Base64UrlDecode(parts[1]));
+        var payload = JsonDocument.Parse(payloadJson).RootElement;
+        payload.GetProperty("sub").GetString().Should().Be(apiKey);
+        payload.GetProperty("iss").GetString().Should().Be("coinbase-cloud");
+        payload.GetProperty("uri").GetString().Should().Be(uri);
+
+        var nbf = payload.GetProperty("nbf").GetInt64();
+        var exp = payload.GetProperty("exp").GetInt64();
+        (exp - nbf).Should().Be(60, "JWT should expire 60 seconds after nbf");
+    }
+
+    private static byte[] Base64UrlDecode(string input)
+    {
+        var padded = input.Replace('-', '+').Replace('_', '/');
+        switch (padded.Length % 4)
+        {
+            case 2: padded += "=="; break;
+            case 3: padded += "="; break;
+        }
+        return Convert.FromBase64String(padded);
     }
 
     [Fact]

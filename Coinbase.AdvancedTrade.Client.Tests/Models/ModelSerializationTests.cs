@@ -604,4 +604,153 @@ public class ModelSerializationTests
     }
 
     #endregion
+
+    #region EditOrder Serialization Tests
+
+    [Fact]
+    public void EditOrderRequest_Serialization_ProducesCorrectJson()
+    {
+        var request = new EditOrderRequest { OrderId = "order-1", Price = "51000", Size = "0.5" };
+
+        var json = JsonSerializer.Serialize(request, _jsonOptions);
+        var deserialized = JsonSerializer.Deserialize<EditOrderRequest>(json, _jsonOptions);
+
+        deserialized.Should().NotBeNull();
+        deserialized!.OrderId.Should().Be("order-1");
+        deserialized.Price.Should().Be("51000");
+        deserialized.Size.Should().Be("0.5");
+        json.Should().Contain("order_id");
+        json.Should().Contain("price");
+        json.Should().Contain("size");
+    }
+
+    [Fact]
+    public void EditOrderResponse_Deserialization_ParsesCorrectly()
+    {
+        var json = @"{
+            ""success"": false,
+            ""errors"": [
+                { ""edit_failure_reason"": ""EDIT_FAILURE_NOT_FOUND"" }
+            ]
+        }";
+
+        var result = JsonSerializer.Deserialize<EditOrderResponse>(json, _jsonOptions);
+
+        result.Should().NotBeNull();
+        result!.Success.Should().BeFalse();
+        result.Errors.Should().HaveCount(1);
+        result.Errors![0].EditFailureReason.Should().Be("EDIT_FAILURE_NOT_FOUND");
+    }
+
+    #endregion
+
+    #region PreviewOrder Serialization Tests
+
+    [Fact]
+    public void PreviewOrderResponse_Deserialization_ParsesCorrectly()
+    {
+        var json = @"{
+            ""order_total"": ""100.50"",
+            ""commission_total"": ""0.50"",
+            ""errs"": [],
+            ""warning"": [],
+            ""quote_size"": ""100"",
+            ""base_size"": ""0.002"",
+            ""best_bid"": ""49999"",
+            ""best_ask"": ""50001"",
+            ""is_max"": false,
+            ""average_filled_price"": ""50000""
+        }";
+
+        var result = JsonSerializer.Deserialize<PreviewOrderResponse>(json, _jsonOptions);
+
+        result.Should().NotBeNull();
+        result!.OrderTotal.Should().Be("100.50");
+        result.CommissionTotal.Should().Be("0.50");
+        result.BestBid.Should().Be("49999");
+        result.BestAsk.Should().Be("50001");
+        result.IsMax.Should().BeFalse();
+        result.BaseSize.Should().Be("0.002");
+    }
+
+    #endregion
+
+    #region TransactionSummary Serialization Tests
+
+    [Fact]
+    public void TransactionSummaryResponse_Deserialization_ParsesCorrectly()
+    {
+        var json = @"{
+            ""total_fees"": 125.5,
+            ""fee_tier"": {
+                ""pricing_tier"": ""<$10k"",
+                ""taker_fee_rate"": ""0.006"",
+                ""maker_fee_rate"": ""0.004"",
+                ""aop_from"": ""0"",
+                ""aop_to"": ""10000""
+            },
+            ""margin_rate"": null,
+            ""advanced_trade_only_volume"": 50000,
+            ""advanced_trade_only_fees"": 100,
+            ""coinbase_pro_volume"": 0,
+            ""coinbase_pro_fees"": 0,
+            ""total_balance"": ""75000.00""
+        }";
+
+        var result = JsonSerializer.Deserialize<TransactionSummaryResponse>(json, _jsonOptions);
+
+        result.Should().NotBeNull();
+        result!.TotalFees.Should().Be(125.5);
+        result.FeeTier.TakerFeeRate.Should().Be("0.006");
+        result.FeeTier.MakerFeeRate.Should().Be("0.004");
+        result.FeeTier.PricingTier.Should().Be("<$10k");
+        result.AdvancedTradeOnlyVolume.Should().Be(50000);
+        result.TotalBalance.Should().Be("75000.00");
+    }
+
+    #endregion
+
+    #region MarketTrades Serialization Tests
+
+    [Fact]
+    public void MarketTradesResponse_Deserialization_ParsesCorrectly()
+    {
+        var json = @"{
+            ""trades"": [
+                {
+                    ""trade_id"": ""trade-1"",
+                    ""product_id"": ""BTC-USD"",
+                    ""price"": ""50000.00"",
+                    ""size"": ""0.1"",
+                    ""time"": ""2024-01-01T00:00:00Z"",
+                    ""side"": ""BUY"",
+                    ""exchange"": ""COINBASE""
+                },
+                {
+                    ""trade_id"": ""trade-2"",
+                    ""product_id"": ""BTC-USD"",
+                    ""price"": ""49999.00"",
+                    ""size"": ""0.05"",
+                    ""time"": ""2024-01-01T00:00:01Z"",
+                    ""side"": ""SELL""
+                }
+            ],
+            ""best_bid"": ""49999"",
+            ""best_ask"": ""50001""
+        }";
+
+        var result = JsonSerializer.Deserialize<MarketTradesResponse>(json, _jsonOptions);
+
+        result.Should().NotBeNull();
+        result!.Trades.Should().HaveCount(2);
+        result.Trades[0].TradeId.Should().Be("trade-1");
+        result.Trades[0].Price.Should().Be("50000.00");
+        result.Trades[0].Side.Should().Be("BUY");
+        result.Trades[0].Exchange.Should().Be("COINBASE");
+        result.Trades[1].Exchange.Should().BeNull();
+        result.BestBid.Should().Be("49999");
+        result.BestAsk.Should().Be("50001");
+    }
+
+    #endregion
 }

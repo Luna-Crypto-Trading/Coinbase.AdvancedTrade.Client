@@ -46,6 +46,24 @@ public interface ICoinbaseApi
     Task<CancelOrdersResponse> CancelOrders([Body] CancelOrdersRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Edit an existing order
+    /// </summary>
+    [Post("/orders/edit")]
+    Task<EditOrderResponse> EditOrder([Body] EditOrderRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Preview an order before placing it
+    /// </summary>
+    [Post("/orders/preview")]
+    Task<PreviewOrderResponse> PreviewOrder([Body] OrderRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Preview an order edit before applying it
+    /// </summary>
+    [Post("/orders/edit/preview")]
+    Task<PreviewOrderResponse> PreviewEditOrder([Body] EditOrderRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Close an existing position/order
     /// </summary>
     [Post("/orders/close_position")]
@@ -91,10 +109,22 @@ public interface ICoinbaseApi
     );
 
     /// <summary>
+    /// Get market trades for a product
+    /// </summary>
+    [Get("/products/{productId}/ticker")]
+    Task<MarketTradesResponse> GetMarketTrades(string productId, [Query] int limit, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get details for a specific product
     /// </summary>
     [Get("/products/{productId}")]
     Task<AdvancedTradeProduct> GetProduct(string productId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get transaction summary (fees and volume)
+    /// </summary>
+    [Get("/transaction_summary")]
+    Task<TransactionSummaryResponse> GetTransactionSummary(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all portfolios for the user
