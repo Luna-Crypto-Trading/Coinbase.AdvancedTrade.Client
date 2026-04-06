@@ -65,6 +65,17 @@ public interface ICoinbaseApi
     );
 
     /// <summary>
+    /// Get public candlestick data for a product (no auth required)
+    /// </summary>
+    [Get("/market/products/{productId}/candles")]
+    Task<CandleResponse> GetPublicProductCandles(
+        string productId,
+        [Query] long start,
+        [Query] long end,
+        [Query] string granularity
+    );
+
+    /// <summary>
     /// Get details for a specific product
     /// </summary>
     [Get("/products/{productId}")]
