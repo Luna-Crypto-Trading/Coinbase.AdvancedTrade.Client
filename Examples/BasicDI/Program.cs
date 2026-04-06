@@ -9,12 +9,8 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add configuration from appsettings.json
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-// Configure Coinbase settings from configuration
-builder.Services.Configure<CoinbaseSettings>(
-    builder.Configuration.GetSection("Coinbase"));
-
 // Add the Coinbase Advanced Trade client to DI container
-builder.Services.AddCoinbaseAdvancedTradeClient();
+builder.Services.AddCoinbaseAdvancedTradeClient(builder.Configuration);
 
 // Add our example service
 builder.Services.AddScoped<ExampleService>();
@@ -43,45 +39,66 @@ public class ExampleService
 
             // Example 1: Get all accounts
             Console.WriteLine("1. Fetching accounts...");
-            var accounts = await _coinbaseClient.GetAccountsAsync();
-            Console.WriteLine($"Found {accounts.Accounts?.Length ?? 0} accounts");
-            
-            if (accounts.Accounts?.Any() == true)
+            var accountsResponse = await _coinbaseClient.ListAccountsAsync();
+            if (accountsResponse.IsSuccess)
             {
-                foreach (var account in accounts.Accounts.Take(3))
+                var accounts = accountsResponse.Data!;
+                Console.WriteLine($"Found {accounts.Accounts?.Length ?? 0} accounts");
+
+                if (accounts.Accounts?.Any() == true)
                 {
-                    Console.WriteLine($"  - {account.Name}: {account.AvailableBalance?.Value} {account.AvailableBalance?.Currency}");
+                    foreach (var account in accounts.Accounts.Take(3))
+                    {
+                        Console.WriteLine($"  - {account.Name}: {account.AvailableBalance?.Value} {account.AvailableBalance?.Currency}");
+                    }
                 }
+            }
+            else
+            {
+                Console.WriteLine($"Error: {accountsResponse.ErrorMessage}");
             }
             Console.WriteLine();
 
             // Example 2: Get products (trading pairs)
-            Console.WriteLine("2. Fetching first 5 products...");
-            var products = await _coinbaseClient.GetProductsAsync(limit: 5);
-            Console.WriteLine($"Found {products.Products?.Length ?? 0} products");
-            
-            if (products.Products?.Any() == true)
+            Console.WriteLine("2. Fetching products...");
+            var productsResponse = await _coinbaseClient.ListProductsAsync();
+            if (productsResponse.IsSuccess)
             {
-                foreach (var product in products.Products)
+                var products = productsResponse.Data!;
+                Console.WriteLine($"Found {products.Products?.Length ?? 0} products");
+
+                if (products.Products?.Any() == true)
                 {
-                    Console.WriteLine($"  - {product.ProductId}: {product.DisplayName} (Status: {product.Status})");
+                    foreach (var product in products.Products.Take(5))
+                    {
+                        Console.WriteLine($"  - {product.ProductId}: {product.DisplayName} (Status: {product.Status})");
+                    }
                 }
+            }
+            else
+            {
+                Console.WriteLine($"Error: {productsResponse.ErrorMessage}");
             }
             Console.WriteLine();
 
-            // Example 3: Get portfolio breakdown
-            Console.WriteLine("3. Fetching portfolio breakdown...");
-            var portfolio = await _coinbaseClient.GetPortfolioBreakdownAsync();
-            Console.WriteLine($"Portfolio breakdown:");
-            Console.WriteLine($"  - Total balance: {portfolio.Breakdown?.TotalBalance?.Value} {portfolio.Breakdown?.TotalBalance?.Currency}");
-            
-            if (portfolio.Breakdown?.SpotPositions?.Any() == true)
+            // Example 3: Get portfolios and breakdown
+            Console.WriteLine("3. Fetching portfolios...");
+            var portfoliosResponse = await _coinbaseClient.GetPortfoliosAsync();
+            if (portfoliosResponse.IsSuccess && portfoliosResponse.Data!.Portfolios?.Any() == true)
             {
-                Console.WriteLine("  - Top holdings:");
-                foreach (var position in portfolio.Breakdown.SpotPositions.Take(3))
+                var firstPortfolio = portfoliosResponse.Data.Portfolios.First();
+                Console.WriteLine($"Portfolio: {firstPortfolio.Name} ({firstPortfolio.Uuid})");
+
+                var breakdownResponse = await _coinbaseClient.GetPortfolioBreakdownAsync(firstPortfolio.Uuid);
+                if (breakdownResponse.IsSuccess)
                 {
-                    Console.WriteLine($"    * {position.Asset}: {position.TotalBalance?.Value} (${position.AssetImgUrl})");
+                    var breakdown = breakdownResponse.Data!;
+                    Console.WriteLine($"  - Total balance: {breakdown.Breakdown?.TotalBalance?.Value} {breakdown.Breakdown?.TotalBalance?.Currency}");
                 }
+            }
+            else
+            {
+                Console.WriteLine($"Error: {portfoliosResponse.ErrorMessage}");
             }
 
             Console.WriteLine();

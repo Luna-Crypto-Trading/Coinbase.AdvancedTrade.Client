@@ -328,7 +328,7 @@ public class StopLimitStopLimitGtdV3
     /// The amount of the first Asset in the Trading Pair. For example, on the BTC-USD Order Book, BTC is the Base Asset.
     /// </summary>
     [JsonPropertyName("base_size")]
-    public decimal BaseSize { get; set; }
+    public required string BaseSize { get; set; }
 
     /// <summary>
     /// The specified price, or better, that the Order should be executed at. A Buy Order will execute at or lower than the limit price. A Sell Order will execute at or higher than the limit price.
@@ -361,7 +361,7 @@ public class TriggerBracketGtcV3
     /// The amount of the first Asset in the Trading Pair. For example, on the BTC-USD Order Book, BTC is the Base Asset.
     /// </summary>
     [JsonPropertyName("base_size")]
-    public decimal BaseSize { get; set; }
+    public required string BaseSize { get; set; }
 
     /// <summary>
     /// The specified price, or better, that the Order should be executed at. A Buy Order will execute at or lower than the limit price. A Sell Order will execute at or higher than the limit price.
@@ -382,7 +382,7 @@ public class TriggerBracketGtdV3
     /// The amount of the first Asset in the Trading Pair. For example, on the BTC-USD Order Book, BTC is the Base Asset.
     /// </summary>
     [JsonPropertyName("base_size")]
-    public decimal BaseSize { get; set; }
+    public required string BaseSize { get; set; }
 
     /// <summary>
     /// The specified price, or better, that the Order should be executed at. A Buy Order will execute at or lower than the limit price. A Sell Order will execute at or higher than the limit price.

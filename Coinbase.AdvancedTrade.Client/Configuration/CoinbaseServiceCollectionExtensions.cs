@@ -22,19 +22,19 @@ public static class CoinbaseServiceCollectionExtensions
     {
         // Configure settings
         services.Configure<CoinbaseSettings>(configuration.GetSection("Coinbase"));
-        
+
         // Also register the settings directly for easier access with validation
         services.AddSingleton<CoinbaseSettings>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<CoinbaseSettings>>();
             var settings = options.Value;
-            
+
             // Validate configuration - API credentials are required for production use
             if (string.IsNullOrEmpty(settings.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
                 throw new InvalidOperationException("Coinbase API credentials (ApiKey and ApiSecret) are required");
             }
-            
+
             return settings;
         });
 
@@ -42,7 +42,7 @@ public static class CoinbaseServiceCollectionExtensions
         services.AddScoped<ICoinbaseJwtGenerator, CoinbaseJwtGenerator>();
         services.AddScoped<IAuthenticatedClientFactory, CoinbaseAuthenticatedClientFactory>();
         services.AddScoped<ICoinbaseCredentialValidator, CoinbaseCredentialValidator>();
-        
+
         // Register authenticator for HTTP message handler scenarios
         services.AddScoped<CoinbaseAuthenticator>(sp =>
         {
@@ -59,7 +59,7 @@ public static class CoinbaseServiceCollectionExtensions
                 var settings = sp.GetRequiredService<CoinbaseSettings>(); // This will trigger validation
                 client.BaseAddress = new Uri(settings.GetActiveBaseUrl());
             });
-            
+
         // Register named HttpClient for tests
         services.AddHttpClient("CoinbaseApi", (sp, client) =>
         {
@@ -90,7 +90,7 @@ public static class CoinbaseServiceCollectionExtensions
         services.AddScoped<ICoinbaseJwtGenerator, CoinbaseJwtGenerator>();
         services.AddScoped<IAuthenticatedClientFactory, CoinbaseAuthenticatedClientFactory>();
         services.AddScoped<ICoinbaseCredentialValidator, CoinbaseCredentialValidator>();
-        
+
         // Register authenticator for HTTP message handler scenarios
         services.AddScoped<CoinbaseAuthenticator>(sp =>
         {
@@ -105,7 +105,7 @@ public static class CoinbaseServiceCollectionExtensions
             {
                 client.BaseAddress = new Uri(settings.GetActiveBaseUrl());
             });
-            
+
         // Register named HttpClient for tests
         services.AddHttpClient("CoinbaseApi", client =>
         {

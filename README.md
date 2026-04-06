@@ -4,14 +4,13 @@ A comprehensive .NET client library for the Coinbase Advanced Trade API. This pa
 
 ## Features
 
-- ✅ **Complete API Coverage**: All major Coinbase Advanced Trade endpoints
-- ✅ **JWT Authentication**: Secure ES256 JWT token generation with automatic header management
-- ✅ **Resilience Patterns**: Built-in retry policies and circuit breaker patterns using Polly
-- ✅ **Strongly Typed**: Comprehensive models for all API requests and responses
-- ✅ **Dependency Injection**: Easy integration with .NET DI container
-- ✅ **Configuration Support**: Supports both appsettings.json and programmatic configuration
-- ✅ **Sandbox Support**: Easy switching between production and sandbox environments
-- ✅ **Async/Await**: Full async/await support with cancellation tokens
+- **JWT Authentication**: Secure ES256 JWT token generation with automatic header management
+- **Resilience Patterns**: Built-in retry policies and circuit breaker patterns using Polly
+- **Strongly Typed**: Comprehensive models for all API requests and responses
+- **Dependency Injection**: Easy integration with .NET DI container
+- **Configuration Support**: Supports both appsettings.json and programmatic configuration
+- **Sandbox Support**: Easy switching between production and sandbox environments
+- **Async/Await**: Full async/await support with cancellation tokens
 
 ## Installation
 
@@ -30,9 +29,7 @@ Add your Coinbase credentials to `appsettings.json`:
   "Coinbase": {
     "ApiKey": "your-api-key",
     "ApiSecret": "your-private-key",
-    "UseSandbox": true,
-    "MaxRetryAttempts": 3,
-    "EnableCircuitBreaker": true
+    "UseSandbox": true
   }
 }
 ```
@@ -42,17 +39,17 @@ Add your Coinbase credentials to `appsettings.json`:
 Register the client in your DI container:
 
 ```csharp
-using Coinbase.AdvancedTrade.Client.Extensions;
+using Coinbase.AdvancedTrade.Client.Configuration;
 
 // From configuration
 services.AddCoinbaseAdvancedTradeClient(configuration);
 
 // Or programmatically
-services.AddCoinbaseAdvancedTradeClient(options =>
+services.AddCoinbaseAdvancedTradeClient(settings =>
 {
-    options.ApiKey = "your-api-key";
-    options.ApiSecret = "your-private-key";
-    options.UseSandbox = true;
+    settings.ApiKey = "your-api-key";
+    settings.ApiSecret = "your-private-key";
+    settings.UseSandbox = true;
 });
 ```
 
@@ -61,7 +58,8 @@ services.AddCoinbaseAdvancedTradeClient(options =>
 Inject and use the client:
 
 ```csharp
-using Coinbase.AdvancedTrade.Client.Client;
+using Coinbase.AdvancedTrade.Client;
+using Coinbase.AdvancedTrade.Client.Models;
 
 public class TradingService
 {
@@ -74,8 +72,10 @@ public class TradingService
 
     public async Task<decimal> GetBitcoinPriceAsync()
     {
-        var products = await _client.ListProductsAsync();
-        var btc = products.Products.FirstOrDefault(p => p.ProductId == "BTC-USD");
+        var response = await _client.ListProductsAsync();
+        if (!response.IsSuccess) return 0;
+
+        var btc = response.Data!.Products?.FirstOrDefault(p => p.ProductId == "BTC-USD");
         return decimal.Parse(btc?.Price ?? "0");
     }
 
@@ -85,7 +85,7 @@ public class TradingService
         {
             ClientOrderId = Guid.NewGuid().ToString(),
             ProductId = "BTC-USD",
-            Side = OrderSide.Buy,
+            Side = "BUY",
             OrderConfiguration = new OrderConfiguration
             {
                 MarketMarketIoc = new MarketMarketIoc
@@ -96,9 +96,13 @@ public class TradingService
         };
 
         var result = await _client.PlaceOrderAsync(order);
-        if (result.Success)
+        if (result.IsSuccess && result.Data!.Success)
         {
-            Console.WriteLine($"Order placed: {result.SuccessResponse.OrderId}");
+            Console.WriteLine($"Order placed: {result.Data.SuccessResponse?.OrderId}");
+        }
+        else
+        {
+            Console.WriteLine($"Order failed: {result.ErrorMessage ?? result.Data?.ErrorResponse?.Message}");
         }
     }
 }
@@ -110,13 +114,24 @@ public class TradingService
 - `ListAccountsAsync()` - List all accounts
 - `GetAccountAsync(Guid id)` - Get specific account details
 
-### Market Data
-- `ListProductsAsync()` - List all available trading pairs
-- `GetProductAsync(string productId)` - Get details for specific product
-- `GetBestBidAskAsync(List<string>? productIds)` - Get best bid/ask prices
-
 ### Order Management
 - `PlaceOrderAsync(OrderRequest request)` - Place a new order
+- `CancelOrdersAsync(List<string> orderIds)` - Cancel one or more orders
+- `GetOrdersAsync(OrderSearchRequest? request)` - Search historical orders with filters
+- `GetOrderAsync(string orderId)` - Get a specific order by ID
+- `ClosePositionAsync(ClosePositionRequest request)` - Close a futures/perp position
+
+### Market Data
+- `ListProductsAsync()` - List all available trading pairs
+- `GetProductAsync(string productId)` - Get details for a specific product
+- `GetBestBidAskAsync(List<string>? productIds)` - Get best bid/ask prices
+- `GetProductCandlesAsync(string productId, long start, long end, string granularity)` - Get OHLCV candlestick data
+
+### Portfolio Management
+- `GetPortfoliosAsync()` - List all portfolios
+- `GetPortfolioBreakdownAsync(string portfolioUuid)` - Get detailed portfolio breakdown
+
+All methods return `ApiResponse<T>` with `IsSuccess`, `Data`, `ErrorMessage`, and `Exception` properties.
 
 ## Configuration Options
 
@@ -127,56 +142,49 @@ public class TradingService
 | `UseSandbox` | Use sandbox environment | `false` |
 | `BaseUrl` | Production API URL | `https://api.coinbase.com/api/v3/brokerage` |
 | `SandboxBaseUrl` | Sandbox API URL | `https://api-sandbox.coinbase.com/api/v3/brokerage` |
-| `Timeout` | HTTP request timeout | `30 seconds` |
-| `MaxRetryAttempts` | Number of retry attempts | `3` |
-| `EnableCircuitBreaker` | Enable circuit breaker pattern | `true` |
-| `CircuitBreakerFailuresBeforeBreaking` | Failures before breaking | `5` |
-| `CircuitBreakerDurationOfBreak` | Break duration | `2 minutes` |
 
 ## Order Types Supported
 
 - **Market Orders**: `MarketMarketIoc`
-- **Limit Orders**: `LimitLimitGtc`, `LimitLimitGtd`, `LimitLimitFok`
-- **Stop Orders**: `StopLimitStopLimitGtc`, `StopLimitStopLimitGtd`
-- **Bracket Orders**: `TriggerBracketGtc`, `TriggerBracketGtd`
+- **Limit Orders**: `LimitLimitGtcV3`, `LimitLimitGtdV3`, `LimitLimitFokV3`
+- **Stop Orders**: `StopLimitStopLimitGtcV3`, `StopLimitStopLimitGtdV3`
+- **Bracket Orders**: `TriggerBracketGtcV3`, `TriggerBracketGtdV3`
 - **Smart Order Routing**: `SorLimitIoc`
 
 ## Error Handling
 
-The client throws `CoinbaseApiException` for API-related errors:
+All methods return `ApiResponse<T>` instead of throwing exceptions:
 
 ```csharp
-try
+var response = await client.ListAccountsAsync();
+if (response.IsSuccess)
 {
-    var accounts = await client.ListAccountsAsync();
+    var accounts = response.Data!;
+    // Use accounts...
 }
-catch (CoinbaseApiException ex)
+else
 {
-    Console.WriteLine($"API Error: {ex.StatusCode} - {ex.Message}");
-    Console.WriteLine($"Details: {ex.ErrorDetails}");
+    Console.WriteLine($"Error: {response.ErrorMessage}");
+    // response.Exception contains the underlying exception if needed
 }
 ```
 
 ## Resilience Features
 
 ### Retry Policy
-- Automatic retries for transient failures
-- Exponential backoff strategy
-- Configurable retry attempts
+- Automatic retries for transient failures (429, 502, 503, 504, 408)
+- Exponential backoff strategy (2^n seconds)
+- 3 retry attempts
 
 ### Circuit Breaker
-- Protects against cascading failures
-- Configurable failure threshold
+- Opens after 5 consecutive failures
+- 2-minute break duration
 - Automatic recovery
-
-### Rate Limiting
-- Handles 429 (Too Many Requests) responses
-- Automatic retry with appropriate delays
 
 ## Getting API Credentials
 
 1. Log in to [Coinbase Advanced Trade](https://advanced.coinbase.com/)
-2. Go to Settings → API Keys
+2. Go to Settings > API Keys
 3. Create a new API key with appropriate permissions
 4. Download your private key and store it securely
 

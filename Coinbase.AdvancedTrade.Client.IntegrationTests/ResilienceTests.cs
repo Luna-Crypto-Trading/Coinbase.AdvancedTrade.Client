@@ -438,7 +438,7 @@ public class ResilienceTests : IDisposable
             {
                 InnerHandler = innerHandler
             };
-            
+
             return new HttpClient(authenticator) { BaseAddress = new Uri(baseUrl) };
         }
     }

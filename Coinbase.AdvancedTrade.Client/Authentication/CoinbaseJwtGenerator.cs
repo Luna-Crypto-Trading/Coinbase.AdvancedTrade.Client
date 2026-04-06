@@ -50,13 +50,10 @@ public class CoinbaseJwtGenerator : ICoinbaseJwtGenerator
 
     private static string RandomHex(int digits)
     {
-        Random random = new();
-        byte[] buffer = new byte[digits / 2];
-        random.NextBytes(buffer);
-        string result = String.Concat(buffer.Select(x => x.ToString("X2")).ToArray());
-        if (digits % 2 == 0)
-            return result;
-        return result + random.Next(16).ToString("X");
+        byte[] buffer = new byte[(digits + 1) / 2];
+        RandomNumberGenerator.Fill(buffer);
+        string result = Convert.ToHexString(buffer);
+        return result[..digits];
     }
 
     static string ParseKey(string key)

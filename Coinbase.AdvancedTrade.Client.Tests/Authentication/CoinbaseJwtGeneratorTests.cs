@@ -64,7 +64,7 @@ public class CoinbaseJwtGeneratorTests
         // Act & Assert - Both should fail consistently with invalid key
         var act1 = () => _sut.GenerateJwt(uri1, TestApiKey, invalidKey);
         var act2 = () => _sut.GenerateJwt(uri2, TestApiKey, invalidKey);
-        
+
         act1.Should().Throw<Exception>();
         act2.Should().Throw<Exception>();
     }
@@ -100,7 +100,7 @@ public class CoinbaseJwtGeneratorTests
     {
         // This test verifies the method signature and basic parameter handling
         // without needing real cryptographic operations
-        
+
         // Arrange
         var uri = "https://api.coinbase.com/api/v3/brokerage/accounts";
         var apiKey = "test-key";

@@ -12,9 +12,12 @@ namespace Coinbase.AdvancedTrade.Client;
 public interface ICoinbaseAdvancedTradeClient
 {
     Task<ApiResponse<OrderInformation>> PlaceOrderAsync(OrderRequest order, CancellationToken cancellationToken = default);
+    Task<ApiResponse<CancelOrdersResponse>> CancelOrdersAsync(List<string> orderIds, CancellationToken cancellationToken = default);
     Task<ApiResponse<OrderInformation>> ClosePositionAsync(ClosePositionRequest request, CancellationToken cancellationToken = default);
     Task<ApiResponse<GetOrdersResponse>> GetOrdersAsync(OrderSearchRequest? request = null, CancellationToken cancellationToken = default);
+    Task<ApiResponse<GetOrderResponse>> GetOrderAsync(string orderId, CancellationToken cancellationToken = default);
     Task<ApiResponse<ListProductsResponse>> ListProductsAsync(CancellationToken cancellationToken = default);
+    Task<ApiResponse<AdvancedTradeProduct>> GetProductAsync(string productId, CancellationToken cancellationToken = default);
     Task<ApiResponse<CandleResponse>> GetProductCandlesAsync(string productId, long start, long end, string granularity, CancellationToken cancellationToken = default);
     Task<ApiResponse<BestBidAskResponse>> GetBestBidAskAsync(List<string>? productIds = null, CancellationToken cancellationToken = default);
     Task<ApiResponse<AccountsResponse>> ListAccountsAsync(CancellationToken cancellationToken = default);
@@ -115,11 +118,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Placing {Side} order for product {ProductId}", order.Side, order.ProductId);
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.PlaceOrder(order);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.PlaceOrder(order, ct2), ct),
+                cancellationToken);
 
             if (!response.Success)
             {
@@ -130,12 +131,32 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
                 return ApiResponse<OrderInformation>.Failure($"Failed to place order: {errorMessage}");
             }
 
-            _logger?.LogInformation("Successfully placed order, ID: {OrderId}", response.SuccessResponse.OrderId);
+            _logger?.LogInformation("Successfully placed order, ID: {OrderId}", response.SuccessResponse?.OrderId);
             return ApiResponse<OrderInformation>.Success(response);
         }
         catch (Exception ex)
         {
             return HandleException<OrderInformation>(ex, "placing order");
+        }
+    }
+
+    public async Task<ApiResponse<CancelOrdersResponse>> CancelOrdersAsync(List<string> orderIds, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Cancelling {Count} order(s)", orderIds.Count);
+
+            var request = new CancelOrdersRequest { OrderIds = orderIds };
+            var response = await _circuitBreakerPolicy.ExecuteAsync(
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.CancelOrders(request, ct2), ct),
+                cancellationToken);
+
+            return ApiResponse<CancelOrdersResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<CancelOrdersResponse>(ex, "cancelling orders");
         }
     }
 
@@ -146,11 +167,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Closing position for product {ProductId}", request.ProductId);
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.ClosePosition(request);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.ClosePosition(request, ct2), ct),
+                cancellationToken);
 
             if (!response.Success)
             {
@@ -177,17 +196,34 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving orders with applied filters");
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.GetOrders(request);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetOrders(request, ct2), ct),
+                cancellationToken);
 
             return ApiResponse<GetOrdersResponse>.Success(response);
         }
         catch (Exception ex)
         {
             return HandleException<GetOrdersResponse>(ex, "retrieving orders");
+        }
+    }
+
+    public async Task<ApiResponse<GetOrderResponse>> GetOrderAsync(string orderId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving order {OrderId}", orderId);
+
+            var response = await _circuitBreakerPolicy.ExecuteAsync(
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetOrder(orderId, ct2), ct),
+                cancellationToken);
+
+            return ApiResponse<GetOrderResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<GetOrderResponse>(ex, $"retrieving order {orderId}");
         }
     }
 
@@ -198,17 +234,34 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving available products");
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.ListProducts();
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.ListProducts(ct2), ct),
+                cancellationToken);
 
             return ApiResponse<ListProductsResponse>.Success(response);
         }
         catch (Exception ex)
         {
             return HandleException<ListProductsResponse>(ex, "retrieving products");
+        }
+    }
+
+    public async Task<ApiResponse<AdvancedTradeProduct>> GetProductAsync(string productId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger?.LogInformation("Retrieving product {ProductId}", productId);
+
+            var response = await _circuitBreakerPolicy.ExecuteAsync(
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetProduct(productId, ct2), ct),
+                cancellationToken);
+
+            return ApiResponse<AdvancedTradeProduct>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            return HandleException<AdvancedTradeProduct>(ex, $"retrieving product {productId}");
         }
     }
 
@@ -219,11 +272,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving historical rates for product {ProductId} with granularity {Granularity}", productId, granularity);
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.GetProductCandles(productId, start, end, granularity);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetProductCandles(productId, start, end, granularity, ct2), ct),
+                cancellationToken);
 
             _logger?.LogInformation("Successfully retrieved historical rates for product {ProductId}", productId);
             return ApiResponse<CandleResponse>.Success(response);
@@ -241,11 +292,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving best bid/ask prices");
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.GetBestBidAsk(productIds);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetBestBidAsk(productIds, ct2), ct),
+                cancellationToken);
 
             return ApiResponse<BestBidAskResponse>.Success(response);
         }
@@ -262,11 +311,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving user accounts");
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.ListAccounts();
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.ListAccounts(ct2), ct),
+                cancellationToken);
 
             return ApiResponse<AccountsResponse>.Success(response);
         }
@@ -283,11 +330,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving account with ID {AccountId}", id);
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.GetAccount(id);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetAccount(id, ct2), ct),
+                cancellationToken);
 
             return ApiResponse<CoinbaseAccount>.Success(response);
         }
@@ -304,11 +349,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving portfolios");
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.GetPortfolios();
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetPortfolios(ct2), ct),
+                cancellationToken);
 
             return ApiResponse<AdvancedTradePortfolioResponse>.Success(response);
         }
@@ -325,11 +368,9 @@ public class CoinbaseAdvancedTradeClient : ICoinbaseAdvancedTradeClient
             _logger?.LogInformation("Retrieving portfolio breakdown for {PortfolioUuid}", portfolioUuid);
 
             var response = await _circuitBreakerPolicy.ExecuteAsync(
-                async () => await _retryPolicy.ExecuteAsync(async () =>
-                {
-                    return await _coinbaseApi.GetPortfolioBreakdown(portfolioUuid);
-                })
-            );
+                async ct => await _retryPolicy.ExecuteAsync(
+                    async ct2 => await _coinbaseApi.GetPortfolioBreakdown(portfolioUuid, ct2), ct),
+                cancellationToken);
 
             return ApiResponse<AdvancedTradePortfolioBreakdownResponse>.Success(response);
         }

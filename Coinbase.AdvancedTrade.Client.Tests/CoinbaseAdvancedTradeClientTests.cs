@@ -569,4 +569,266 @@ public class CoinbaseAdvancedTradeClientTests
     }
 
     #endregion
+
+    #region CancelOrdersAsync Tests
+
+    [Fact]
+    public async Task CancelOrdersAsync_WithSuccessfulCancellation_ReturnsSuccess()
+    {
+        // Arrange
+        var orderIds = new List<string> { "order-1", "order-2" };
+        var expectedResponse = new CancelOrdersResponse
+        {
+            Results = new List<CancelOrderResult>
+            {
+                new CancelOrderResult { Success = true, OrderId = "order-1" },
+                new CancelOrderResult { Success = true, OrderId = "order-2" }
+            }
+        };
+
+        _mockApi.CancelOrders(Arg.Any<CancelOrdersRequest>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.CancelOrdersAsync(orderIds);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.Results.Should().HaveCount(2);
+        result.Data.Results.Should().AllSatisfy(r => r.Success.Should().BeTrue());
+    }
+
+    [Fact]
+    public async Task CancelOrdersAsync_WithPartialFailure_ReturnsResultsWithFailures()
+    {
+        // Arrange
+        var orderIds = new List<string> { "order-1", "order-2" };
+        var expectedResponse = new CancelOrdersResponse
+        {
+            Results = new List<CancelOrderResult>
+            {
+                new CancelOrderResult { Success = true, OrderId = "order-1" },
+                new CancelOrderResult { Success = false, OrderId = "order-2", FailureReason = "UNKNOWN_CANCEL_FAILURE_REASON" }
+            }
+        };
+
+        _mockApi.CancelOrders(Arg.Any<CancelOrdersRequest>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.CancelOrdersAsync(orderIds);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.Results.Should().HaveCount(2);
+        result.Data.Results[0].Success.Should().BeTrue();
+        result.Data.Results[1].Success.Should().BeFalse();
+        result.Data.Results[1].FailureReason.Should().Be("UNKNOWN_CANCEL_FAILURE_REASON");
+    }
+
+    [Fact]
+    public async Task CancelOrdersAsync_WithApiException_ReturnsError()
+    {
+        // Arrange
+        var orderIds = new List<string> { "order-1" };
+        var apiException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Post, "https://api.coinbase.com"),
+            HttpMethod.Post,
+            new HttpResponseMessage(HttpStatusCode.Unauthorized),
+            new RefitSettings()
+        );
+
+        _mockApi.CancelOrders(Arg.Any<CancelOrdersRequest>()).Throws(apiException);
+
+        // Act
+        var result = await _sut.CancelOrdersAsync(orderIds);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("Authentication failed");
+    }
+
+    #endregion
+
+    #region GetOrderAsync Tests
+
+    [Fact]
+    public async Task GetOrderAsync_WithValidOrderId_ReturnsOrder()
+    {
+        // Arrange
+        var orderId = "test-order-id";
+        var expectedResponse = new GetOrderResponse
+        {
+            Order = new OrderV3
+            {
+                OrderId = orderId,
+                ProductId = "BTC-USD",
+                UserId = "user-1",
+                OrderConfiguration = new OrderConfiguration(),
+                Side = "BUY",
+                ClientOrderId = "client-order-1",
+                Status = "FILLED",
+                TimeInForce = "GOOD_UNTIL_CANCELLED",
+                CreatedTime = "2024-01-01T00:00:00Z",
+                CompletionPercentage = "100",
+                FilledSize = "0.5",
+                AverageFilledPrice = "50000",
+                NumberOfFills = "1"
+            }
+        };
+
+        _mockApi.GetOrder(orderId).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.GetOrderAsync(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.Order.OrderId.Should().Be(orderId);
+        result.Data.Order.Status.Should().Be("FILLED");
+    }
+
+    [Fact]
+    public async Task GetOrderAsync_WithNotFoundOrderId_ReturnsError()
+    {
+        // Arrange
+        var orderId = "nonexistent-order";
+        var notFoundException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Get, "https://api.coinbase.com"),
+            HttpMethod.Get,
+            new HttpResponseMessage(HttpStatusCode.NotFound),
+            new RefitSettings()
+        );
+
+        _mockApi.GetOrder(orderId).Throws(notFoundException);
+
+        // Act
+        var result = await _sut.GetOrderAsync(orderId);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("not found");
+    }
+
+    #endregion
+
+    #region GetProductAsync Tests
+
+    [Fact]
+    public async Task GetProductAsync_WithValidProductId_ReturnsProduct()
+    {
+        // Arrange
+        var productId = "BTC-USD";
+        var expectedProduct = new AdvancedTradeProduct
+        {
+            ProductId = productId,
+            Price = "50000.00",
+            PricePercentageChange24h = "2.5",
+            Volume24h = "1000",
+            VolumePercentageChange24h = "5.0",
+            BaseIncrement = "0.00000001",
+            QuoteIncrement = "0.01",
+            QuoteMinSize = "1",
+            QuoteMaxSize = "10000000",
+            BaseMinSize = "0.00000001",
+            BaseMaxSize = "1000",
+            BaseCurrencyId = "BTC",
+            QuoteCurrencyId = "USD",
+            DisplayName = "BTC/USD",
+            Status = "online"
+        };
+
+        _mockApi.GetProduct(productId).Returns(expectedProduct);
+
+        // Act
+        var result = await _sut.GetProductAsync(productId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Data!.ProductId.Should().Be(productId);
+        result.Data.Price.Should().Be("50000.00");
+    }
+
+    [Fact]
+    public async Task GetProductAsync_WithNotFoundProduct_ReturnsError()
+    {
+        // Arrange
+        var productId = "INVALID-PAIR";
+        var notFoundException = await ApiException.Create(
+            new HttpRequestMessage(HttpMethod.Get, "https://api.coinbase.com"),
+            HttpMethod.Get,
+            new HttpResponseMessage(HttpStatusCode.NotFound),
+            new RefitSettings()
+        );
+
+        _mockApi.GetProduct(productId).Throws(notFoundException);
+
+        // Act
+        var result = await _sut.GetProductAsync(productId);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.ErrorMessage.Should().Contain("not found");
+    }
+
+    #endregion
+
+    #region CancellationToken Tests
+
+    [Fact]
+    public async Task PlaceOrderAsync_CancellationToken_IsPassedToApi()
+    {
+        // Arrange
+        var orderRequest = new OrderRequest
+        {
+            ClientOrderId = Guid.NewGuid().ToString(),
+            ProductId = "BTC-USD",
+            Side = "BUY",
+            OrderConfiguration = new OrderConfiguration
+            {
+                MarketMarketIoc = new MarketMarketIoc { QuoteSize = "100" }
+            }
+        };
+
+        var expectedResponse = new OrderInformation
+        {
+            Success = true,
+            SuccessResponse = new SuccessResponse { OrderId = "test-order-id" }
+        };
+
+        using var cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        _mockApi.PlaceOrder(Arg.Any<OrderRequest>(), Arg.Any<CancellationToken>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.PlaceOrderAsync(orderRequest, token);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        await _mockApi.Received(1).PlaceOrder(Arg.Any<OrderRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ListAccountsAsync_CancellationToken_IsPassedToApi()
+    {
+        // Arrange
+        var expectedResponse = new AccountsResponse
+        {
+            Accounts = new List<CoinbaseAccount>(),
+            HasNext = false
+        };
+
+        using var cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        _mockApi.ListAccounts(Arg.Any<CancellationToken>()).Returns(expectedResponse);
+
+        // Act
+        var result = await _sut.ListAccountsAsync(token);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        await _mockApi.Received(1).ListAccounts(Arg.Any<CancellationToken>());
+    }
+
+    #endregion
 }

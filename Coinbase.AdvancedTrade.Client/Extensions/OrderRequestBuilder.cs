@@ -132,7 +132,7 @@ public class OrderRequestBuilder
 
         _order.OrderConfiguration.StopLimitStopLimitGtd = new StopLimitStopLimitGtdV3
         {
-            BaseSize = baseSize,
+            BaseSize = baseSize.ToString(CultureInfo.InvariantCulture),
             LimitPrice = limitPrice.ToString(CultureInfo.InvariantCulture),
             StopPrice = stopPrice.ToString(CultureInfo.InvariantCulture),
             StopDirection = stopDirectionString,
