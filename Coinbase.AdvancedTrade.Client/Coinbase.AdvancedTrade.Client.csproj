@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Coinbase.AdvancedTrade.Client</PackageId>
-    <Version>0.3.1-alpha</Version>
+    <Version>0.4.0-alpha</Version>
     <Authors>Luna Crypto Trading</Authors>
     <Company>Luna Crypto Trading</Company>
-    <Description>A comprehensive .NET client library for Coinbase Advanced Trade API with built-in JWT authentication, resilience patterns, and dependency injection support. Includes all major endpoints: accounts, orders, products, portfolios, historical data, and real-time pricing.</Description>
-    <PackageReleaseNotes>Alpha v0.3.1 - Complete Coinbase Advanced Trade client extracted from production code. Features: JWT authentication with ECDSA signing, comprehensive models for all endpoints, retry policies with exponential backoff, circuit breaker patterns, full DI integration with IServiceCollection extensions, async/await throughout, structured logging support, fluent order builders, helper extensions, and credential validation. Clean namespace structure.</PackageReleaseNotes>
+    <Description>A comprehensive .NET client library for the Coinbase Advanced Trade API with full REST API coverage (48 endpoints), ES256 JWT authentication, Polly resilience policies, Refit-generated HTTP clients, and Microsoft DI integration. Covers accounts, orders, products, portfolios, futures, perpetuals, converts, payments, and public market data.</Description>
+    <PackageReleaseNotes>Alpha v0.4.0 - Full Coinbase Advanced Trade REST API coverage. Added 28 new endpoints: order fills, product book, portfolio CRUD, 9 futures/CFM, 6 perpetuals/INTX, 3 convert, 2 payment methods, 6 public market data, and API key permissions. Backfilled missing query parameters on existing endpoints. Reorganized client into partial classes by domain.</PackageReleaseNotes>
     <PackageTags>coinbase;api;client;crypto;trading;dependency-injection</PackageTags>
     <RepositoryUrl>https://github.com/Luna-Crypto-Trading/Coinbase.AdvancedTrade.Client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-.NET 10 client library for the Coinbase Advanced Trade API, published as a NuGet package (`Coinbase.AdvancedTrade.Client`, currently `0.3.1-alpha`). Wraps the REST API with ES256 JWT authentication, Polly resilience policies, Refit-generated HTTP clients, and Microsoft DI integration.
+.NET 10 client library for the Coinbase Advanced Trade API, published as a NuGet package (`Coinbase.AdvancedTrade.Client`, currently `0.4.0-alpha`). Provides full REST API coverage (48 endpoints) with ES256 JWT authentication, Polly resilience policies, Refit-generated HTTP clients, and Microsoft DI integration.
 
 ## Development Commands
 
@@ -42,12 +42,29 @@ Consumer → ICoinbaseAdvancedTradeClient (resilience + error mapping)
 ### Key Layers
 
 - **`Api/ICoinbaseApi`** — Refit interface defining all REST endpoints. Refit generates the HTTP implementation at registration time.
-- **`CoinbaseAdvancedTradeClient`** — High-level client wrapping `ICoinbaseApi`. Every method returns `ApiResponse<T>` (success/failure with error details) instead of throwing. Contains Polly retry (3 attempts, exponential backoff on transient HTTP errors) and circuit breaker (5 failures, 2-min break) policies.
+- **`CoinbaseAdvancedTradeClient`** — High-level partial class wrapping `ICoinbaseApi`. Every method returns `ApiResponse<T>` (success/failure with error details) instead of throwing. Contains Polly retry (3 attempts, exponential backoff on transient HTTP errors) and circuit breaker (5 failures, 2-min break) policies. Split into domain files: `*.Futures.cs`, `*.Perpetuals.cs`, `*.Converts.cs`.
 - **`Authentication/`** — `CoinbaseJwtGenerator` creates ES256 JWTs (1-min expiry) using `jose-jwt`. `CoinbaseAuthenticator` is a `DelegatingHandler` that generates a fresh JWT per request and sets the `Authorization: Bearer` header.
 - **`Configuration/`** — `CoinbaseSettings` (Options pattern) holds `ApiKey`, `ApiSecret`, `BaseUrl`, `UseSandbox`. Three `AddCoinbaseAdvancedTradeClient()` overloads register everything into DI (from `IConfiguration`, direct settings, or lambda).
-- **`Models/`** — Strongly-typed request/response models using `System.Text.Json` with `[JsonPropertyName]`. Currency values are `string` (not `decimal`) per Coinbase API convention; extension methods provide decimal conversion.
-- **`Extensions/`** — `OrderRequestBuilder` (fluent builder for orders), `CoinbaseModelExtensions` (decimal parsing, status checks, spread calculations).
+- **`Models/`** — Strongly-typed request/response models using `System.Text.Json` with `[JsonPropertyName]`. Currency values are `string` (not `decimal`) per Coinbase API convention; extension methods provide decimal conversion. Organized into subdirectories by domain: `Portfolios/`, `Futures/`, `Perpetuals/`, `Converts/`, `Payments/`, `Public/`.
+- **`Extensions/`** — `OrderRequestBuilder` (fluent builder for orders), `CoinbaseModelExtensions` (decimal parsing for products, orders, fills, futures positions, perps balances, convert amounts; status checks; spread calculations).
 - **`Validation/`** — `CoinbaseCredentialValidator` verifies API keys by calling `GET /accounts`.
+
+### API Coverage (48 endpoints)
+
+| Domain | Endpoints | Notes |
+|--------|:---------:|-------|
+| Accounts | 2 | List + Get, with pagination params |
+| Orders | 9 | Place, Edit, Preview, Cancel, Close, Get, List, Fills |
+| Products | 3 | List, Get, ProductBook |
+| Market Data | 4 | BestBidAsk, Candles, MarketTrades, ProductBook |
+| Fees | 1 | TransactionSummary with filters |
+| Portfolios | 6 | List, Get, Create, Edit, Delete, MoveFunds |
+| Futures/CFM | 9 | BalanceSummary, Positions, Sweeps, Margin settings |
+| Perpetuals/INTX | 6 | Allocate, Portfolio, Positions, Balances, Collateral |
+| Converts | 3 | Quote, GetTrade, CommitTrade |
+| Payments | 2 | List + Get payment methods |
+| Public | 6 | ServerTime, Products, Candles, Trades, ProductBook |
+| Data | 1 | KeyPermissions |
 
 ### Testing
 

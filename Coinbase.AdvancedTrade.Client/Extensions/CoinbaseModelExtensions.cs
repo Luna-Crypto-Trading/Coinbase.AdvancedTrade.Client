@@ -149,6 +149,109 @@ public static class CoinbaseModelExtensions
     {
         return decimal.TryParse(order.AverageFilledPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var price) ? price : 0m;
     }
+    // Fill extensions
+
+    /// <summary>
+    /// Gets the fill price as a decimal
+    /// </summary>
+    public static decimal GetPriceAsDecimal(this Fill fill)
+    {
+        return decimal.TryParse(fill.Price, NumberStyles.Any, CultureInfo.InvariantCulture, out var price) ? price : 0m;
+    }
+
+    /// <summary>
+    /// Gets the fill size as a decimal
+    /// </summary>
+    public static decimal GetSizeAsDecimal(this Fill fill)
+    {
+        return decimal.TryParse(fill.Size, NumberStyles.Any, CultureInfo.InvariantCulture, out var size) ? size : 0m;
+    }
+
+    /// <summary>
+    /// Gets the fill commission as a decimal
+    /// </summary>
+    public static decimal GetCommissionAsDecimal(this Fill fill)
+    {
+        return decimal.TryParse(fill.Commission, NumberStyles.Any, CultureInfo.InvariantCulture, out var commission) ? commission : 0m;
+    }
+
+    /// <summary>
+    /// Gets the total value of the fill (price * size)
+    /// </summary>
+    public static decimal GetTotalValue(this Fill fill)
+    {
+        return fill.GetPriceAsDecimal() * fill.GetSizeAsDecimal();
+    }
+
+    // Futures extensions
+
+    /// <summary>
+    /// Gets futures buying power as a decimal
+    /// </summary>
+    public static decimal GetFuturesBuyingPowerAsDecimal(this FuturesBalanceSummary summary)
+    {
+        return decimal.TryParse(summary.FuturesBuyingPower, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    /// <summary>
+    /// Gets futures unrealized PnL as a decimal
+    /// </summary>
+    public static decimal GetUnrealizedPnlAsDecimal(this FuturesBalanceSummary summary)
+    {
+        return decimal.TryParse(summary.UnrealizedPnl, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    /// <summary>
+    /// Gets futures position unrealized PnL as a decimal
+    /// </summary>
+    public static decimal GetUnrealizedPnlAsDecimal(this FuturesPositionDetail position)
+    {
+        return decimal.TryParse(position.UnrealizedPnl, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    // Perpetuals extensions
+
+    /// <summary>
+    /// Gets perps position unrealized PnL as a decimal
+    /// </summary>
+    public static decimal GetUnrealizedPnlAsDecimal(this IntxPosition position)
+    {
+        return decimal.TryParse(position.UnrealizedPnl, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    /// <summary>
+    /// Gets perps position net size as a decimal
+    /// </summary>
+    public static decimal GetNetSizeAsDecimal(this IntxPosition position)
+    {
+        return decimal.TryParse(position.NetSize, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    /// <summary>
+    /// Gets perps balance quantity as a decimal
+    /// </summary>
+    public static decimal GetQuantityAsDecimal(this IntxBalance balance)
+    {
+        return decimal.TryParse(balance.Quantity, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    /// <summary>
+    /// Gets perps balance collateral value as a decimal
+    /// </summary>
+    public static decimal GetCollateralValueAsDecimal(this IntxBalance balance)
+    {
+        return decimal.TryParse(balance.CollateralValue, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
+
+    // Convert extensions
+
+    /// <summary>
+    /// Gets a convert amount value as a decimal
+    /// </summary>
+    public static decimal GetValueAsDecimal(this ConvertAmount amount)
+    {
+        return decimal.TryParse(amount.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+    }
 }
 
 /// <summary>
