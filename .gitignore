@@ -209,6 +209,9 @@ FodyWeavers.xsd
 nupkg/
 *.orig
 
+# Planning and spec artifacts (kept locally only — never committed)
+docs/superpowers/
+
 # Sensitive configuration files
 appsettings.Production.json
 appsettings.Development.local.json

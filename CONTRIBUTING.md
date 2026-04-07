@@ -84,6 +84,34 @@ Additionally:
 - Use **FluentAssertions** for assertions (`result.Should().Be(...)`).
 - Client methods return `ApiResponse<T>` and never throw — your tests should assert on `IsSuccess`/`ErrorMessage`, not `try/catch`.
 
+## Commit Messages
+
+This repository uses [Conventional Commits](https://www.conventionalcommits.org/) to drive automated versioning and changelog generation via [release-please](https://github.com/googleapis/release-please).
+
+**Format:**
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types that trigger releases (pre-1.0):**
+
+- `fix:` — patch bump (e.g., 0.1.3 → 0.1.4)
+- `feat:` — patch bump pre-1.0 (e.g., 0.1.3 → 0.1.4), still grouped as a Feature in the changelog; becomes minor post-1.0
+- `feat!:` or footer `BREAKING CHANGE:` — minor bump pre-1.0 (e.g., 0.1.3 → 0.2.0); becomes major post-1.0 (e.g., 1.2.3 → 2.0.0)
+
+**Types that appear in the changelog but do not trigger releases:**
+
+- `docs:`, `perf:`, `refactor:`, `build:`, `ci:`, `chore:`, `test:`, `style:`
+
+**Cutting 1.0.0:** Include the footer `Release-As: 1.0.0` on any commit merged to `main`. release-please will open a Release PR for `1.0.0` on its next run.
+
+Commits that do not follow this convention will not produce a release but will still be merged normally.
+
 ## Pull Request Guidelines
 
 1. Branch from `main`.
