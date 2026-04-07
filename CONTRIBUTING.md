@@ -101,8 +101,8 @@ This repository uses [Conventional Commits](https://www.conventionalcommits.org/
 **Types that trigger releases (pre-1.0):**
 
 - `fix:` — patch bump (e.g., 0.1.3 → 0.1.4)
-- `feat:` — patch bump pre-1.0 (e.g., 0.1.3 → 0.1.4); becomes minor post-1.0
-- `feat!:` or footer `BREAKING CHANGE:` — minor bump pre-1.0 (e.g., 0.1.3 → 0.2.0); becomes major post-1.0
+- `feat:` — patch bump pre-1.0 (e.g., 0.1.3 → 0.1.4), still grouped as a Feature in the changelog; becomes minor post-1.0
+- `feat!:` or footer `BREAKING CHANGE:` — minor bump pre-1.0 (e.g., 0.1.3 → 0.2.0); becomes major post-1.0 (e.g., 1.2.3 → 2.0.0)
 
 **Types that appear in the changelog but do not trigger releases:**
 
