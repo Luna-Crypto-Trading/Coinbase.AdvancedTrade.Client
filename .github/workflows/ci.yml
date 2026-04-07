@@ -31,6 +31,7 @@ jobs:
       run: dotnet build --no-restore --configuration Release
     
     - name: Run Unit Tests with Coverage
+      shell: bash
       run: |
         dotnet test Coinbase.AdvancedTrade.Client.Tests/Coinbase.AdvancedTrade.Client.Tests.csproj \
           --no-build \
@@ -39,8 +40,9 @@ jobs:
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
-    
+
     - name: Run Integration Tests with Coverage
+      shell: bash
       run: |
         dotnet test Coinbase.AdvancedTrade.Client.IntegrationTests/Coinbase.AdvancedTrade.Client.IntegrationTests.csproj \
           --no-build \

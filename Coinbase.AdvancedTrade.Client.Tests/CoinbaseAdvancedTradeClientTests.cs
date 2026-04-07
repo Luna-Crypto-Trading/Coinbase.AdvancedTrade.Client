@@ -178,7 +178,7 @@ public class CoinbaseAdvancedTradeClientTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Data!.SuccessResponse.OrderId.Should().Be("success-after-retry");
+        result.Data!.SuccessResponse!.OrderId.Should().Be("success-after-retry");
 
         await _mockApi.Received(3).PlaceOrder(orderRequest);
     }
@@ -520,7 +520,7 @@ public class CoinbaseAdvancedTradeClientTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Data!.SuccessResponse.OrderId.Should().Be("close-position-order-id");
+        result.Data!.SuccessResponse!.OrderId.Should().Be("close-position-order-id");
 
         await _mockApi.Received(1).ClosePosition(request);
     }
