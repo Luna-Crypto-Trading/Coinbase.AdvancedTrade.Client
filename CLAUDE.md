@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-.NET 10 client library for the Coinbase Advanced Trade API, published as a NuGet package (`Coinbase.AdvancedTrade.Client`, currently `0.4.0-alpha`). Provides full REST API coverage (48 endpoints) with ES256 JWT authentication, Polly resilience policies, Refit-generated HTTP clients, and Microsoft DI integration.
+.NET 10 client library for the Coinbase Advanced Trade API, published as a NuGet package (`Coinbase.AdvancedTrade.Client`). Provides full REST API coverage (48 endpoints) with ES256 JWT authentication, Polly resilience policies, Refit-generated HTTP clients, and Microsoft DI integration.
 
 ## Development Commands
 
@@ -73,15 +73,16 @@ Consumer → ICoinbaseAdvancedTradeClient (resilience + error mapping)
 
 ## CI/CD
 
-CI runs on push to `main`/`develop` and PRs to `main` (`.github/workflows/ci.yml`):
+CI runs on push to `main` and PRs to `main` (`.github/workflows/ci.yml`):
 - Matrix: ubuntu/windows/macos + .NET 10
 - Stages: build, unit tests, integration tests, `dotnet format` check, analyzer warnings-as-errors, security scan
-- Publishing: version tags (`v*`) trigger NuGet.org publish + GitHub Release
 
-## Publishing
+## Releases
 
-1. Update `<Version>` in `Coinbase.AdvancedTrade.Client.csproj`
-2. Commit, tag (`git tag v0.4.0-alpha`), push tag
-3. CI builds, tests, publishes to NuGet.org (requires `NUGET_API_KEY` secret)
+Releases are driven by [release-please](https://github.com/googleapis/release-please) on Conventional Commits — there is no manual version bump or tag step.
 
-Note: v1.0.0 was accidentally published and unlisted. Use `--prerelease` flag for current alpha versions.
+- Version source of truth: `.release-please-manifest.json` at the repo root.
+- On every push to `main`, `.github/workflows/release-please.yml` opens or updates a "Release PR" that bumps the version and updates `CHANGELOG.md` based on Conventional Commits since the last release.
+- Merging the Release PR creates the git tag and GitHub Release, and the same workflow's `publish` job builds with `/p:Version=$VERSION`, packs `Coinbase.AdvancedTrade.Client.csproj`, and pushes to NuGet.org (requires the `NUGET_API_KEY` secret).
+- Pre-1.0, `feat:` bumps patch and `feat!:` / `BREAKING CHANGE:` bumps minor (per `release-please-config.json`).
+- See [`CONTRIBUTING.md`](CONTRIBUTING.md#commit-messages) for the Conventional Commits rules contributors must follow.

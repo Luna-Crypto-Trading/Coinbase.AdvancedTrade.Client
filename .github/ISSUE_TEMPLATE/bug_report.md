@@ -37,7 +37,7 @@ secrets, API keys, or PII.
 
 ## Environment
 
-- **Package version:** <!-- e.g. 0.4.0-alpha -->
+- **Package version:** <!-- e.g. 0.1.0 -->
 - **.NET SDK version:** <!-- output of `dotnet --version` -->
 - **OS:** <!-- e.g. macOS 14.5, Windows 11, Ubuntu 24.04 -->
 - **Coinbase environment:** <!-- production / sandbox -->
